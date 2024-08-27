@@ -1,0 +1,53 @@
+/* src/pages/MazeGame.css */
+.maze-game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    font-family: 'Manrope', sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    text-align: center;
+}
+
+.maze {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.maze-row {
+    display: flex;
+}
+
+.maze-cell {
+    width: 30px;
+    height: 30px;
+}
+
+.wall {
+    background-color: #000;
+}
+
+.path {
+    background-color: #fff;
+}
+
+.player {
+    background-color: #00f;
+}
+
+.start {
+    background-color: #f00;
+}
+
+.end {
+    background-color: #0f0;
+}
+
+.completion-message {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #28a745;
+}

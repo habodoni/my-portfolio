@@ -1,38 +1,55 @@
+/* src/App.css */
+body {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  background-color: #f7f7f7;
+  color: #333;
+}
+
 .App {
-  text-align: center;
+  position: relative;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.navigation-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-top: 20px;
 }
 
-.App-link {
-  color: #61dafb;
+.progress-bar {
+  display: flex;
+  width: 80%;
+  margin-bottom: 10px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.progress-segment {
+  flex-grow: 1;
+  height: 5px;
+  background-color: lightgray;
+  margin: 0 2px;
+}
+
+.progress-segment.active {
+  background-color: gray;
+}
+
+.navigation-text {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+}
+
+.navigation-link {
+  text-decoration: none;
+  color: lightgray;
+  font-size: 14px;
+}
+
+.navigation-link:hover {
+  color: black;
+}
+
+.content-container {
+  padding: 20px;
 }

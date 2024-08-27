@@ -1,0 +1,68 @@
+/* src/components/TypingTest.css */
+.typing-test-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90vh;
+    text-align: center;
+    position: relative;
+}
+
+.text-display {
+    font-size: 42px;
+    line-height: 1.5;
+    color: gray;
+    position: relative;
+    white-space: pre-wrap;
+    max-width: 80%;
+}
+
+.text-display span {
+    position: relative;
+}
+
+.text-display .correct {
+    color: black;
+}
+
+.text-display .incorrect {
+    color: red;
+}
+
+.hidden-textarea {
+    opacity: 0;
+    position: absolute;
+    left: -9999px;
+}
+
+.wpm-display {
+    font-size: 24px;
+    color: #333;
+    margin-top: 20px;
+}
+
+.instructions {
+    font-size: 16px;
+    color: #666;
+    margin-top: 10px;
+}
+
+.reset-button {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 1px;
+}
+
+.reset-button:hover {
+    color: black;
+}
+
+.completion-message {
+    font-size: 24px;
+    color: green;
+    margin-top: 20px;
+}

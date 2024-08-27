@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+.timeline-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+    font-family: 'Manrope', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 2.2em;
+    font-weight: 700;
+}
+
+.scroll-prompt {
+    text-align: center;
+    color: #666;
+    font-size: 1em;
+    margin-bottom: 20px;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.timeline {
+    position: relative;
+    flex-grow: 1;
+    padding: 20px 0;
+}
+
+.timeline::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    background-color: #000;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin-left: -1.5px;
+}
+
+.timeline-item {
+    padding: 15px 0;
+    position: relative;
+    width: 50%;
+    box-sizing: border-box;
+    margin-bottom: 30px;
+}
+
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border: 3px solid #000;
+    top: 20px;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.timeline-item.left {
+    left: 0;
+    padding-right: 50px;
+}
+
+.timeline-item.right {
+    left: 50%;
+    padding-left: 50px;
+}
+
+.timeline-item.left::after {
+    right: -8px;
+}
+
+.timeline-item.right::after {
+    left: -8px;
+}
+
+.timeline-content {
+    padding: 20px;
+    background-color: white;
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    width: calc(100% - 50px);
+}
+
+.timeline-title {
+    font-weight: 700;
+    font-size: 1.3em;
+    margin-bottom: 8px;
+}
+
+.timeline-org {
+    font-style: italic;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.timeline-date {
+    color: #666;
+    font-size: 1em;
+    margin-bottom: 10px;
+    font-weight: 400;
+}
+
+.timeline-description {
+    font-size: 1.05em;
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+@media screen and (max-width: 900px) {
+    .timeline-container {
+        padding: 20px;
+    }
+
+    .scroll-prompt {
+        font-size: 0.9em;
+    }
+
+    .timeline::after {
+        left: 31px;
+    }
+
+    .timeline-item {
+        width: 100%;
+        padding-left: 70px;
+        padding-right: 25px;
+    }
+
+    .timeline-item::after {
+        left: 23px;
+    }
+
+    .timeline-item.right {
+        left: 0;
+    }
+
+    .timeline-content {
+        width: 100%;
+    }
+}
