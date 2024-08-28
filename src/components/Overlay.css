@@ -12,7 +12,7 @@
     align-items: center;
     cursor: pointer;
     z-index: 10;
-    overflow: hidden; /* Ensure no scrollbar appears */
+    overflow: hidden;
 }
 
 .overlay-content {

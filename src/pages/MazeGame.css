@@ -51,3 +51,18 @@
     font-size: 18px;
     color: #28a745;
 }
+
+.maze-cell.key {
+    background-color: gold;
+  }
+  
+  .maze-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .maze-info span {
+    font-size: 18px;
+    font-weight: bold;
+  }

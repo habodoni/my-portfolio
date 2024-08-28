@@ -9,38 +9,61 @@ const Timeline = () => {
         {
             title: "Regulatory Publishing Intern",
             org: "Regeneron Pharmaceuticals",
-            date: "May 2023 - Aug 2024",
-            description: "Streamlined FDA submission processes in Tarrytown, New York.",
+            date: "May 2023 – Aug 2024",
+            description: (
+                <>
+                    Improved FDA submission efficiency by 15% through standardized document templates and automation routines.<br /><br />
+                    Enhanced submission accuracy by 10% using Veeva Vault RIM, Docubridge, and Adobe Acrobat DC.<br /><br />
+                    Mentored a fellow intern, streamlining team workflows and enhancing regulatory process understanding.
+                </>
+            ),
         },
         {
             title: "Research Assistant",
             org: "Lab for Intelligent Integrated Networks of Engineering Systems",
-            date: "Jan 2023 - Current",
-            description: "Developed tools to automate data processing in Hoboken, New Jersey.",
+            date: "Jan 2023 – Current",
+            description: (
+                <>
+                    Co-developed a codebase improving data transfer efficiency by 50% through optimized binary data conversion.<br /><br />
+                    Automated processing of a 15,000+ page book of figures using a tool for data scraping, visualization, and sorting.<br /><br />
+                    Verified laboratory data models by performing data scrubbing and statistical analysis.
+                </>
+            ),
         },
         {
             title: "Interactive Sensory Pad Engineer",
             org: "Independent Project",
             date: "Aug 2024",
-            description: "Developed an interactive sensory pad for an autistic patient.",
+            description: (
+                <>
+                    Developed an interactive sensory pad to aid a non-verbal child's speech challenges, facilitating verbal communication.<br /><br />
+                    Engineered the pad using ESP32 microcontroller, DFPlayer Mini, and piezoelectric sensor for customized audio feedback.<br /><br />
+                    Utilized C++ and Arduino IDE to ensure responsive and reliable operation of the sensory pad.
+                </>
+            ),
         },
         {
             title: "Vice President",
             org: "INCOSE Stevens Chapter",
-            date: "Jun 2024 - Current",
-            description: "Led events and promoted systems engineering in Hoboken, New Jersey.",
-        },
-        {
-            title: "Enrolled in Software Engineering",
-            org: "Stevens Institute of Technology",
-            date: "Sep 2022",
-            description: "Pursuing Software Engineering with a GPA of 3.791.",
+            date: "Jun 2024 – Current",
+            description: (
+                <>
+                    Led events and workshops to promote systems engineering.<br /><br />
+                    Collaborated with professionals to provide networking opportunities.<br /><br />
+                    Managed chapter administration, including meetings and member engagement.
+                </>
+            ),
         },
         {
             title: "Student Programmer",
             org: "University of Pennsylvania",
-            date: "Jun 2021 - Aug 2021",
-            description: "Decreased risk in a stock portfolio using machine learning techniques.",
+            date: "Jun 2021 – Aug 2021",
+            description: (
+                <>
+                    Reduced portfolio risk by 15% through a program clustering stocks based on market reactions.<br /><br />
+                    Utilized K-Means Clustering (KMC), Principal Component Analysis (PCA), and Normalization techniques.
+                </>
+            ),
         }
     ];
 
