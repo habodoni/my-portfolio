@@ -1,8 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes, Link, useLocation, useNavigate } from 'react-router-dom'; // Switch to HashRouter
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import LandingPage from './pages/LandingPage';
-import CodeEditor from './pages/CodeEditor'; // Correct path
+import CodeEditor from './pages/CodeEditor';
 import MazeGame from './pages/MazeGame';
 import ResumeTimeline from './pages/ResumeTimeline';
 import ContactPage from './pages/ContactPage';
