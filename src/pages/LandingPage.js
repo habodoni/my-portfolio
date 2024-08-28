@@ -20,7 +20,7 @@ const LandingPage = ({ onStart }) => {
             {showInitialOverlay && (
                 <div className="overlay" onClick={handleInitialClick}>
                     <div className="overlay-content">
-                        <p>Hi, my name is Hazem Abo-Donia. Welcome to my portfolio! I hope that by the end of this journey, you will have gotten to know me a little better.</p>
+                        <p>Hi, test my name is Hazem Abo-Donia. Welcome to my portfolio! I hope that by the end of this journey, you will have gotten to know me a little better.</p>
                         <p>Click anywhere to get started.</p>
                     </div>
                 </div>
