@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './ResumeTimeline.css';
 
 const Timeline = () => {
+    const navigate = useNavigate();
+
     const events = [
         {
             title: "Regulatory Publishing Intern",
@@ -41,6 +44,10 @@ const Timeline = () => {
         }
     ];
 
+    const handleNextPage = () => {
+        navigate('/Contact');
+    };
+
     return (
         <div className="timeline-container">
             <h2>Experience</h2>
@@ -57,6 +64,9 @@ const Timeline = () => {
                     </div>
                 ))}
             </div>
+            <button className="next-page-button" onClick={handleNextPage}>
+                Next Page
+            </button>
         </div>
     );
 };

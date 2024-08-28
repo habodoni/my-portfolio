@@ -2,11 +2,11 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useLocation, useNavigate } from 'react-router-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import LandingPage from './pages/LandingPage';
-import CodeEditor from './components/CodeEditor'; // Correct path
+import CodeEditor from './pages/CodeEditor'; // Correct path
 import MazeGame from './pages/MazeGame';
 import ResumeTimeline from './pages/ResumeTimeline';
 import ContactPage from './pages/ContactPage';
-import TypingTest from './components/TypingTest';
+import TypingTest from './pages/TypingTest';
 import './App.css';
 import './PageTransitions.css';
 

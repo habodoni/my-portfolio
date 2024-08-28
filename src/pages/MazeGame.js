@@ -1,4 +1,3 @@
-// src/pages/MazeGame.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Overlay from '../components/Overlay';
@@ -45,7 +44,7 @@ const MazeGame = () => {
             setIsComplete(true);
             setTimeout(() => {
                 navigate('/resume-timeline');
-            }, 3000); // Redirect after 3 seconds
+            }, 3000);
         }
     };
 
@@ -109,7 +108,7 @@ const MazeGame = () => {
                             </div>
                         ))}
                     </div>
-                    {isComplete && <p className="completion-message">Nice work! Let's see what's next...</p>}
+                    {isComplete && <p className="completion-message">Nice work! Now let's look at my experience...</p>}
                 </>
             )}
         </div>

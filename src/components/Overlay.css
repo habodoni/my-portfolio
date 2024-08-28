@@ -12,13 +12,15 @@
     align-items: center;
     cursor: pointer;
     z-index: 10;
-    transition: opacity 0.3s ease;
+    overflow: hidden; /* Ensure no scrollbar appears */
 }
 
 .overlay-content {
     text-align: center;
     padding: 20px;
     max-width: 600px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .overlay-content p {

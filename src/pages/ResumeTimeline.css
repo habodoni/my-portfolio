@@ -116,6 +116,25 @@ h2 {
     font-weight: 400;
 }
 
+.next-page-button {
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.2rem;
+    color: #333;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    margin-top: 30px;
+    align-self: center;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.next-page-button:hover {
+    color: #000;
+    border-bottom: 2px solid #000;
+}
+
 @media screen and (max-width: 900px) {
     .timeline-container {
         padding: 20px;
@@ -145,5 +164,10 @@ h2 {
 
     .timeline-content {
         width: 100%;
+    }
+
+    .next-page-button {
+        font-size: 1rem;
+        padding: 8px 16px;
     }
 }

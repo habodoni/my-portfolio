@@ -9,7 +9,7 @@ const TypingTest = () => {
     const [wpm, setWpm] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const inputRef = useRef(null);
-    const navigate = useNavigate(); // Use navigate hook
+    const navigate = useNavigate();
 
     const texts = [
         "Here's some text for you, let's see how fast you can type."
@@ -60,22 +60,32 @@ const TypingTest = () => {
 
     const handleChange = (e) => {
         const newText = e.target.value;
+    
         if (!startTime) {
             startTest();
         }
+    
         setInput(newText);
-
+    
+        console.log("User input:", newText);
+        console.log("Target text:", text);
+    
         if (newText === text) {
+            console.log("Match found!");
             setIsComplete(true);
             calculateWpm();
+        } else {
+            console.log("No match yet.");
         }
     };
+    
+    
 
     useEffect(() => {
         if (isComplete) {
             const timer = setTimeout(() => {
-                navigate('/code-editor'); // Navigate to the code editor page after completion
-            }, 3000); // 3-second delay
+                navigate('/code-editor');
+            }, 3000);
             return () => clearTimeout(timer);
         }
     }, [isComplete, navigate]);
@@ -107,7 +117,7 @@ const TypingTest = () => {
             />
             {isComplete && <p className="wpm-display">Your WPM is: {wpm}</p>}
             {isComplete && <p className="completion-message">Nice! Let's move on...</p>}
-            <p className="instructions">Press "Ctrl + R" to reset the test.</p>
+            <p className="instructions">Press "Tab + Enter" to reset the test.</p>
             <button className="reset-button" onClick={resetTest}>Reset</button>
         </div>
     );

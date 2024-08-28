@@ -5,7 +5,7 @@ import { Controlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
 import 'codemirror/mode/javascript/javascript';
-import Overlay from '../components/Overlay'; // Ensure the correct path
+import Overlay from '../components/Overlay';
 
 const CodeEditor = () => {
     const [code, setCode] = useState('// Write your name in below \nconsole.log("Hello, world my name is !");');
@@ -30,7 +30,7 @@ const CodeEditor = () => {
 
         setTimeout(() => {
             navigate('/maze-game');
-        }, 3000); // Redirect after 3 seconds
+        }, 3000); 
     };
 
     const handleOverlayClick = () => {

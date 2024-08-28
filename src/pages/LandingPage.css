@@ -1,4 +1,3 @@
-/* src/pages/LandingPage.css */
 .landing-page-container {
     display: flex;
     flex-direction: column;
@@ -19,7 +18,6 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.6);
-    /* Darker shade of gray with lighter opacity */
     color: white;
     display: flex;
     justify-content: center;
@@ -38,22 +36,15 @@
 .overlay-content p {
     margin: 10px 0;
     font-size: 28px;
-    /* Larger font size */
     font-weight: 300;
-    /* Thinner font weight */
     -webkit-font-smoothing: antialiased;
-    /* Improve font rendering */
     -moz-osx-font-smoothing: grayscale;
-    /* Improve font rendering */
 }
 
 .overlay-content p:last-child {
     font-weight: 400;
     font-style: italic;
-    /* Slightly bolder for emphasis */
     font-size: 22px;
     -webkit-font-smoothing: antialiased;
-    /* Improve font rendering */
     -moz-osx-font-smoothing: grayscale;
-    /* Improve font rendering */
 }

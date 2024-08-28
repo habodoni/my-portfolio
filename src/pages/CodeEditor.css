@@ -7,9 +7,7 @@
     font-family: 'Manrope', sans-serif;
     padding: 20px;
     height: 80vh;
-    /* Adjust height to raise the elements higher */
     font-size: 1.7em;
-    /* Make everything a bit bigger */
 }
 
 .editor-wrapper {
@@ -20,7 +18,6 @@
 
 .run-code-button {
     margin-top: 20px;
-    /* Move the button down a bit */
     background: none;
     border: none;
     color: #666;
@@ -28,7 +25,6 @@
     cursor: pointer;
     padding: 10px 20px;
     font-family: 'Manrope', sans-serif;
-    /* Ensure consistent font */
 }
 
 .run-code-button:hover {
@@ -39,12 +35,8 @@
     margin-top: 20px;
     width: 100%;
     max-width: 600px;
-    /* Match width of code editor */
     font-size: 1em;
-    /* Ensure the output font size is consistent */
 }
-
-/* src/components/CodeEditor.css */
 
 .code-editor-container .run-button {
     background: none;
