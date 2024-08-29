@@ -112,3 +112,33 @@
     text-align: center;
     font-weight: bold;
 }
+
+.contact-icons {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.contact-icon {
+    width: 40px;
+    height: 35px;
+    transition: transform 0.3s ease;
+}
+
+.contact-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Media Query for Mobile Devices */
+@media (max-width: 768px) {
+    .contact-title {
+        margin-top: 20%;
+        font-size: 2rem; /* Smaller title on mobile */
+    }
+
+    .contact-description {
+        margin-top: 0%;
+        font-size: 1rem; /* Smaller description on mobile */
+    }
+}

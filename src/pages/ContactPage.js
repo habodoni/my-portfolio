@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import './ContactPage.css';
+import githubIcon from '../icons/GithubLogo.png';
+import linkedinIcon from '../icons/LinkedinLogo.png';
+import emailIcon from '../icons/EmailLogo.png';
 
 const ContactPage = () => {
     const navigate = useNavigate();
@@ -99,6 +102,18 @@ const ContactPage = () => {
             </form>
 
             {thankYouMessage && <p className="thank-you-message">{thankYouMessage}</p>}
+
+            <div className="contact-icons">
+                <a href="https://github.com/habodoni" target="_blank" rel="noopener noreferrer">
+                    <img src={githubIcon} alt="GitHub" className="contact-icon" />
+                </a>
+                <a href="https://www.linkedin.com/in/hazem-abo-donia-51b8ba238/" target="_blank" rel="noopener noreferrer">
+                    <img src={linkedinIcon} alt="LinkedIn" className="contact-icon" />
+                </a>
+                <a href="mailto:habodoni@stevens.edu">
+                    <img src={emailIcon} alt="Email" className="contact-icon" />
+                </a>
+            </div>
 
             <button className="home-button" onClick={() => navigate('/')}>Back to Home</button>
         </div>
