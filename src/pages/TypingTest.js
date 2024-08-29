@@ -60,17 +60,21 @@ const TypingTest = () => {
 
     const handleChange = (e) => {
         const newText = e.target.value;
-    
+        
         if (!startTime) {
             startTest();
         }
     
+        // Normalize apostrophes in both input and target text
+        const normalizedInput = newText.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
+        const normalizedText = text.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
+    
         setInput(newText);
     
-        console.log("User input:", newText);
-        console.log("Target text:", text);
+        console.log("User input:", normalizedInput);
+        console.log("Target text:", normalizedText);
     
-        if (newText === text) {
+        if (normalizedInput === normalizedText) {
             console.log("Match found!");
             setIsComplete(true);
             calculateWpm();
@@ -78,6 +82,7 @@ const TypingTest = () => {
             console.log("No match yet.");
         }
     };
+    
     
     
 

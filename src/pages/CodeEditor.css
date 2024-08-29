@@ -1,4 +1,16 @@
+/* Base styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Manrope', sans-serif;
+}
+
 .code-editor-container {
+    margin-top: 100px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -6,8 +18,10 @@
     text-align: center;
     font-family: 'Manrope', sans-serif;
     padding: 20px;
-    height: 80vh;
+    min-height: 80vh;
     font-size: 1.7em;
+    width: 100%;
+    max-width: 100%;
 }
 
 .editor-wrapper {
@@ -16,7 +30,23 @@
     margin: 0 auto;
 }
 
-.run-code-button {
+.editor-wrapper textarea {
+    width: 100%;
+    max-width: 100%;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    resize: vertical;
+    min-height: 200px;
+    font-family: monospace;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.8em; /* Adjusted for better readability */
+    line-height: 1.4;
+}
+
+.run-code-button, .code-editor-container .run-button {
     margin-top: 20px;
     background: none;
     border: none;
@@ -27,7 +57,7 @@
     font-family: 'Manrope', sans-serif;
 }
 
-.run-code-button:hover {
+.run-code-button:hover, .code-editor-container .run-button:hover {
     color: black;
 }
 
@@ -36,18 +66,49 @@
     width: 100%;
     max-width: 600px;
     font-size: 1em;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    text-align: center; /* Center the text inside the output */
 }
 
-.code-editor-container .run-button {
-    background: none;
-    border: none;
-    color: #666;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 20px;
-    font-family: 'Manrope', sans-serif;
-}
+/* Media Queries for Mobile */
+@media only screen and (max-width: 768px) {
+    .code-editor-container {
+        margin-top: 50px;
+        font-size: 1.4em;
+        padding: 10px;
+    }
 
-.code-editor-container .run-button:hover {
-    color: black;
+    .editor-wrapper {
+        width: calc(100% - 20px);
+        max-width: calc(100% - 20px);
+        margin: 0 10px;
+    }
+
+    .editor-wrapper textarea {
+        font-size: 0.7em; /* Further reduced for mobile */
+    }
+
+    .output {
+        width: calc(100% - 20px);
+        max-width: calc(100% - 20px);
+        font-size: 0.9em;
+        margin: 20px 10px 0;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .run-code-button, .code-editor-container .run-button {
+        font-size: 0.9em;
+        padding: 8px 16px;
+    }
 }

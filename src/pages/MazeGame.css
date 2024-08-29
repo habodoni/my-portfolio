@@ -4,11 +4,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 80vh;
+    min-height: 80vh;
     font-family: 'Manrope', sans-serif;
     background-color: #f7f7f7;
     color: #333;
     text-align: center;
+    padding: 20px; /* Added padding for better mobile spacing */
 }
 
 .maze {
@@ -54,15 +55,101 @@
 
 .maze-cell.key {
     background-color: gold;
-  }
-  
-  .maze-info {
+}
+
+.maze-info {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
-  }
-  
-  .maze-info span {
+}
+
+.maze-info span {
     font-size: 18px;
     font-weight: bold;
-  }
+}
+
+.keyboard-instructions {
+    font-size: 16px;
+    color: #555;
+    margin-top: 10px; /* Adjust as needed for spacing */
+    text-align: center;
+}
+
+/* Media Queries for Mobile */
+@media only screen and (max-width: 768px) {
+    .maze-game-container {
+        padding: 10px;
+    }
+
+    .maze-cell {
+        width: 20px; /* Reduced size for better fit on small screens */
+        height: 20px;
+    }
+
+    .completion-message {
+        font-size: 16px; /* Slightly smaller text for mobile */
+    }
+
+    .maze-info span {
+        font-size: 16px; /* Adjusted for better readability on mobile */
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .maze-cell {
+        width: 15px; /* Further reduced size for smaller screens */
+        height: 15px;
+    }
+
+    .completion-message {
+        font-size: 14px; /* Further reduced for smaller screens */
+    }
+
+    .maze-info span {
+        font-size: 14px; /* Adjusted for small screens */
+    }
+}
+
+/* Mobile Arrow Keys */
+.mobile-arrow-keys {
+    display: none; /* Hidden by default */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px; /* Adjust as needed */
+    margin-bottom: 100px;
+}
+
+.horizontal-arrows {
+    display: flex;
+    justify-content: space-evenly;
+    margin: -20px 0; /* Increased margin for more space between arrows */
+}
+
+
+.arrow-key {
+    width: 50px;
+    height: 50px;
+    font-size: 34px;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: black;
+}
+
+.arrow-key.up, .arrow-key.down {
+    margin: 10 auto;
+}
+
+/* Media query for mobile devices */
+@media screen and (max-width: 900px) {
+    .mobile-arrow-keys {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+}

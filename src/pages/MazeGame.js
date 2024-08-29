@@ -31,7 +31,6 @@ const MazeGame = () => {
         ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']
     ];
 
-
     const movePlayer = (x, y) => {
         const newX = playerPosition.x + x;
         const newY = playerPosition.y + y;
@@ -71,6 +70,23 @@ const MazeGame = () => {
         }
     };
 
+    const handleArrowKeyPress = (direction) => {
+        switch(direction) {
+            case 'up':
+                movePlayer(0, -1);
+                break;
+            case 'down':
+                movePlayer(0, 1);
+                break;
+            case 'left':
+                movePlayer(-1, 0);
+                break;
+            case 'right':
+                movePlayer(1, 0);
+                break;
+        }
+    };
+
     const handleOverlayClick = () => {
         setShowOverlay(false);
     };
@@ -81,6 +97,7 @@ const MazeGame = () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, [playerPosition]);
+
 
     return (
         <div className="maze-game-container">
@@ -93,6 +110,9 @@ const MazeGame = () => {
             {!showOverlay && (
                 <>
                     <h1>Take a crack at it.</h1>
+                    <p className="keyboard-instructions">
+                        You can use your keyboard (WASD keys, arrow keys) or the on-screen keys.
+                    </p>
                     <div className="maze">
                         {maze.map((row, rowIndex) => (
                             <div key={rowIndex} className="maze-row">
@@ -109,10 +129,19 @@ const MazeGame = () => {
                         ))}
                     </div>
                     {isComplete && <p className="completion-message">Nice work! Now let's look at my experience...</p>}
+                    <div className="mobile-arrow-keys">
+                        <button className="arrow-key up" onClick={() => handleArrowKeyPress('up')}>&#9650;</button>
+                        <div className="horizontal-arrows">
+                            <button className="arrow-key left" onClick={() => handleArrowKeyPress('left')}>&#9668;</button>
+                            <button className="arrow-key right" onClick={() => handleArrowKeyPress('right')}>&#9658;</button>
+                        </div>
+                        <button className="arrow-key down" onClick={() => handleArrowKeyPress('down')}>&#9660;</button>
+                    </div>
                 </>
             )}
         </div>
     );
+    
 };
 
 export default MazeGame;

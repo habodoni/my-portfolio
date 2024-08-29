@@ -40,7 +40,8 @@ h2 {
     top: 0;
     bottom: 0;
     left: 50%;
-    margin-left: -1.5px;
+    transform: translateX(-50%);
+    z-index: 0;
 }
 
 .timeline-item {
@@ -49,18 +50,6 @@ h2 {
     width: 50%;
     box-sizing: border-box;
     margin-bottom: 30px;
-}
-
-.timeline-item::after {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    background-color: white;
-    border: 3px solid #000;
-    top: 20px;
-    border-radius: 50%;
-    z-index: 1;
 }
 
 .timeline-item.left {
@@ -73,13 +62,30 @@ h2 {
     padding-left: 50px;
 }
 
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border: 3px solid #000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 1;
+}
+
 .timeline-item.left::after {
-    right: -8px;
+    left: 100%; /* Align the left side circles to the end of the left container */
+    transform: translate(-50%, -50%);
 }
 
 .timeline-item.right::after {
-    left: -8px;
+    left: 0%; /* Align the right side circles to the start of the right container */
+    transform: translate(-50%, -50%);
 }
+
 
 .timeline-content {
     padding: 20px;
@@ -135,6 +141,7 @@ h2 {
     border-bottom: 2px solid #000;
 }
 
+/* Media Queries for Mobile */
 @media screen and (max-width: 900px) {
     .timeline-container {
         padding: 20px;
@@ -145,25 +152,43 @@ h2 {
     }
 
     .timeline::after {
-        left: 31px;
+        display: none; /* Remove the timeline line on mobile */
     }
 
     .timeline-item {
         width: 100%;
-        padding-left: 70px;
-        padding-right: 25px;
+        padding-left: 0;
+        padding-right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center; /* Center align the text in the boxes */
     }
 
     .timeline-item::after {
-        left: 23px;
-    }
-
-    .timeline-item.right {
-        left: 0;
+        display: none; /* Remove the timeline line on mobile */
     }
 
     .timeline-content {
-        width: 100%;
+        width: calc(100% - 40px); /* Adjust width to account for padding */
+        max-width: 500px; /* Limit maximum width for readability */
+        margin-top: 30px; /* Space between circle and content */
+        text-align: center; /* Center align the content */
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .timeline-item.left,
+    .timeline-item.right {
+        left: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .timeline-item.left .timeline-content,
+    .timeline-item.right .timeline-content {
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .next-page-button {

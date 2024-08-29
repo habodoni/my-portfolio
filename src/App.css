@@ -38,12 +38,15 @@ body {
   display: flex;
   justify-content: space-between;
   width: 80%;
+  flex-wrap: wrap; /* Allows wrapping of text if necessary */
 }
 
 .navigation-link {
   text-decoration: none;
   color: lightgray;
   font-size: 14px;
+  white-space: nowrap; /* Prevents the text from wrapping */
+  margin: 0 5px; /* Adds some spacing between links */
 }
 
 .navigation-link:hover {
@@ -52,4 +55,37 @@ body {
 
 .content-container {
   padding: 20px;
+}
+
+/* Media Queries for Mobile */
+@media only screen and (max-width: 768px) {
+  .navigation-container {
+    margin-top: 10px;
+  }
+
+  .progress-bar {
+    width: 90%; /* Adjust width for smaller screens */
+    margin-bottom: 8px;
+  }
+
+  .progress-segment {
+    height: 4px; /* Reduce height for smaller screens */
+    margin: 0 1px;
+  }
+
+  .navigation-text {
+    width: 100%; /* Use the full width for navigation text */
+    justify-content: center; /* Center the navigation links */
+    flex-wrap: wrap; /* Allows the links to wrap onto the next line if necessary */
+  }
+
+  .navigation-link {
+    font-size: 12px; /* Slightly reduce font size for better fit */
+    margin: 2px 4px; /* Adjust margin to fit more links horizontally */
+    white-space: nowrap; /* Ensure links don't break into multiple lines */
+  }
+
+  .content-container {
+    padding: 15px; /* Reduce padding for smaller screens */
+  }
 }
