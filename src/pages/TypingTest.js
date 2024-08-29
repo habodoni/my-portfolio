@@ -12,7 +12,7 @@ const TypingTest = () => {
     const navigate = useNavigate();
 
     const texts = [
-        "Here's some text for you, let's see how fast you can type."
+        "Here is some practice for you, how fast can you type?"
     ];
 
     useEffect(() => {

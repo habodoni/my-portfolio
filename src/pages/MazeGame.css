@@ -1,4 +1,4 @@
-/* src/pages/MazeGame.css */
+/* General Styles */
 .maze-game-container {
     display: flex;
     flex-direction: column;
@@ -113,7 +113,7 @@
 /* Mobile Arrow Keys */
 .mobile-arrow-keys {
     display: none; /* Hidden by default */
-    position:relative;
+    position: relative;
     bottom: 20px;
     width: 150px; /* Adjust as needed */
     margin-top: 100px;
@@ -122,9 +122,9 @@
 .horizontal-arrows {
     display: flex;
     justify-content: space-evenly;
+    align-items: center; /* Ensure items are centered vertically */
     margin: -20px 0; /* Increased margin for more space between arrows */
 }
-
 
 .arrow-key {
     width: 50px;
@@ -136,11 +136,27 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: black;
+    color: gray;
+    outline: none; /* Remove the default focus outline */
+    transition: color 0.2s, background-color 0.2s; /* Smooth transition for color and background change */
+    box-sizing: border-box; /* Ensure padding and borders don't affect the size */
+}
+
+.arrow-key:hover {
+    color: black; /* Change color to black on hover */
+    background-color: transparent; /* Prevent any background color change on hover */
+}
+
+.arrow-key:active {
+    color: black; /* Change color to black when clicked */
+}
+
+.arrow-key:focus {
+    outline: none; /* Remove the blue focus box */
 }
 
 .arrow-key.up, .arrow-key.down {
-    margin: 10 auto;
+    margin: 10px auto;
 }
 
 /* Media query for mobile devices */
@@ -149,5 +165,11 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+
+    .arrow-key {
+        width: 45px;
+        height: 45px;
+        margin: 5px; /* Adjusted for better spacing on smaller screens */
     }
 }
