@@ -1,13 +1,14 @@
 {
   "files": {
-    "main.css": "/static/css/main.374ce491.css",
-    "main.js": "/static/js/main.994ca303.js",
+    "main.css": "/static/css/main.72b09055.css",
+    "main.js": "/static/js/main.e41a4950.js",
+    "static/media/EmailLogo.png": "/static/media/EmailLogo.f67118d0d5487442de03.png",
     "index.html": "/index.html",
-    "main.374ce491.css.map": "/static/css/main.374ce491.css.map",
-    "main.994ca303.js.map": "/static/js/main.994ca303.js.map"
+    "main.72b09055.css.map": "/static/css/main.72b09055.css.map",
+    "main.e41a4950.js.map": "/static/js/main.e41a4950.js.map"
   },
   "entrypoints": [
-    "static/css/main.374ce491.css",
-    "static/js/main.994ca303.js"
+    "static/css/main.72b09055.css",
+    "static/js/main.e41a4950.js"
   ]
 }
