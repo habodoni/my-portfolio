@@ -4,26 +4,19 @@ import './CodeEditor.css';
 import { Controlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
-import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/python/python';
 import Overlay from '../components/Overlay';
 
 const CodeEditor = () => {
-    const [code, setCode] = useState('// Write your name in below \nconsole.log("Hello, world my name is !");');
+    const [code, setCode] = useState('# Write your name in below\nprint("Hello, world! I\'m ")');
     const [output, setOutput] = useState('');
     const [showOverlay, setShowOverlay] = useState(true);
     const navigate = useNavigate();
 
     const runCode = () => {
         try {
-            const consoleLog = console.log;
-            const logs = [];
-            console.log = (message) => logs.push(message);
-
-            eval(code);
-
-            console.log = consoleLog;
-
-            setOutput(logs.join('\n'));
+            const name = code.match(/I'm (.+)"/) ? code.match(/I'm (.+)"/)[1] : "";
+            setOutput(`Hello, world! I'm ${name}`);
         } catch (error) {
             setOutput(error.message);
         }
@@ -51,7 +44,7 @@ const CodeEditor = () => {
                     <CodeMirror
                         value={code}
                         options={{
-                            mode: 'javascript',
+                            mode: 'python',
                             theme: 'material',
                             lineNumbers: true,
                         }}

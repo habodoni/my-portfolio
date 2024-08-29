@@ -7,6 +7,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Manrope', sans-serif;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .code-editor-container {
@@ -22,6 +23,7 @@ body {
     font-size: 1.7em;
     width: 100%;
     max-width: 100%;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .editor-wrapper {
@@ -42,7 +44,7 @@ body {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 0.8em; /* Adjusted for better readability */
+    font-size: 0.8em;
     line-height: 1.4;
 }
 
@@ -73,9 +75,9 @@ body {
     padding: 10px;
     border-radius: 4px;
     display: flex;
-    justify-content: center; /* Center content horizontally */
-    align-items: center; /* Center content vertically */
-    text-align: center; /* Center the text inside the output */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 /* Media Queries for Mobile */
@@ -84,6 +86,7 @@ body {
         margin-top: 50px;
         font-size: 1.4em;
         padding: 10px;
+        overflow-x: hidden; /* Prevent horizontal scroll on mobile */
     }
 
     .editor-wrapper {
@@ -93,7 +96,7 @@ body {
     }
 
     .editor-wrapper textarea {
-        font-size: 0.7em; /* Further reduced for mobile */
+        font-size: 0.7em;
     }
 
     .output {
