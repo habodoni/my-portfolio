@@ -65,9 +65,13 @@ const TypingTest = () => {
             startTest();
         }
     
-        // Normalize apostrophes in both input and target text
-        const normalizedInput = newText.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
-        const normalizedText = text.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
+        // Normalize both straight and curly apostrophes
+        const normalizeApostrophes = (str) => {
+            return str.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'").replace(/[\u0027]/g, "'");
+        };
+    
+        const normalizedInput = normalizeApostrophes(newText);
+        const normalizedText = normalizeApostrophes(text);
     
         setInput(newText);
     
@@ -83,9 +87,6 @@ const TypingTest = () => {
         }
     };
     
-    
-    
-
     useEffect(() => {
         if (isComplete) {
             const timer = setTimeout(() => {
