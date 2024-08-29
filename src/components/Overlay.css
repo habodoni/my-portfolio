@@ -1,4 +1,3 @@
-/* src/components/Overlay.css */
 .overlay {
     position: fixed;
     top: 0;
@@ -13,6 +12,7 @@
     cursor: pointer;
     z-index: 10;
     overflow: hidden;
+    touch-action: none; /* Prevents scaling issues related to touch */
 }
 
 .overlay-content {
@@ -21,11 +21,11 @@
     max-width: 600px;
     width: 100%;
     box-sizing: border-box;
+    font-size: 3.5vw; /* Adjusted to use viewport width units */
 }
 
 .overlay-content p {
     margin: 10px 0;
-    font-size: 28px;
     font-weight: 300;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -34,7 +34,17 @@
 .overlay-content p:last-child {
     font-weight: 400;
     font-style: italic;
-    font-size: 22px;
+    font-size: 2.5vw; /* Use viewport width for consistent scaling */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+@media (min-width: 768px) {
+    .overlay-content p {
+        font-size: 28px; /* Default to original size on larger screens */
+    }
+
+    .overlay-content p:last-child {
+        font-size: 22px; /* Default to original size on larger screens */
+    }
 }
