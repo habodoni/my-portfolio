@@ -113,12 +113,10 @@
 /* Mobile Arrow Keys */
 .mobile-arrow-keys {
     display: none; /* Hidden by default */
-    position: fixed;
+    position:relative;
     bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
     width: 150px; /* Adjust as needed */
-    margin-bottom: 100px;
+    margin-top: 100px;
 }
 
 .horizontal-arrows {
