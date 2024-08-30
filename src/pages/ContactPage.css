@@ -142,3 +142,63 @@
         font-size: 1rem; /* Smaller description on mobile */
     }
 }
+
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 80vh;
+    font-family: 'Manrope', sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    padding: 20px;
+    box-sizing: border-box; /* Ensure padding is included in the height calculation */
+}
+
+/* Media Query for Laptops and Smaller Screens */
+@media (max-width: 1024px) {
+    .contact-container {
+        padding-top: 60px; /* Add padding to create space between navbar and content */
+    }
+
+    .contact-title {
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+    }
+
+    .contact-description {
+        font-size: 1.1rem;
+        margin-bottom: 25px;
+    }
+
+    .contact-form {
+        max-width: 90%; /* Adjust form width for smaller screens */
+    }
+
+    .contact-icons {
+        margin-top: 25px;
+    }
+}
+
+/* Media Query for Mobile Devices */
+@media (max-width: 768px) {
+    .contact-title {
+        margin-top: 15%;
+        font-size: 2rem; /* Smaller title on mobile */
+    }
+
+    .contact-description {
+        font-size: 1rem; /* Smaller description on mobile */
+        margin-bottom: 20px; /* Adjust margin for better spacing */
+    }
+
+    .contact-form {
+        max-width: 100%; /* Make form width 100% on mobile */
+    }
+
+    .contact-icons {
+        margin-top: 20px;
+    }
+}
