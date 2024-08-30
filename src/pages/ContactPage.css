@@ -4,11 +4,12 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    height: 80vh;
+    min-height: 80vh;
     font-family: 'Manrope', sans-serif;
     background-color: #f7f7f7;
     color: #333;
-    padding: 10px;
+    padding: 20px;
+    box-sizing: border-box; /* Ensure padding is included in the height calculation */
 }
 
 .contact-title {
@@ -130,46 +131,16 @@
     transform: scale(1.1);
 }
 
-/* Media Query for Mobile Devices */
-@media (max-width: 768px) {
-    .contact-title {
-        margin-top: 20%;
-        font-size: 2rem; /* Smaller title on mobile */
-    }
-
-    .contact-description {
-        margin-top: 0%;
-        font-size: 1rem; /* Smaller description on mobile */
-    }
-}
-
-.contact-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    min-height: 80vh;
-    font-family: 'Manrope', sans-serif;
-    background-color: #f7f7f7;
-    color: #333;
-    padding: 20px;
-    box-sizing: border-box; /* Ensure padding is included in the height calculation */
-}
-
 /* Media Query for Laptops and Smaller Screens */
 @media (max-width: 1024px) {
-    .contact-container {
-        padding-top: 60px; /* Add padding to create space between navbar and content */
-    }
-
     .contact-title {
-        font-size: 2.2rem;
+        font-size: 2rem; /* Reduce title size for smaller laptops */
+        margin-top: 8vh; /* Adjust top margin */
         margin-bottom: 15px;
     }
 
     .contact-description {
-        font-size: 1.1rem;
+        font-size: 1.1rem; /* Reduce description size */
         margin-bottom: 25px;
     }
 
@@ -185,13 +156,14 @@
 /* Media Query for Mobile Devices */
 @media (max-width: 768px) {
     .contact-title {
-        margin-top: 15%;
-        font-size: 2rem; /* Smaller title on mobile */
+        font-size: 1.5rem; /* Further reduce title size for mobile */
+        margin-top: 10vh; /* Further adjust top margin */
+        margin-bottom: 15px;
     }
 
     .contact-description {
-        font-size: 1rem; /* Smaller description on mobile */
-        margin-bottom: 20px; /* Adjust margin for better spacing */
+        font-size: 1rem; /* Further reduce description size for mobile */
+        margin-bottom: 20px;
     }
 
     .contact-form {
