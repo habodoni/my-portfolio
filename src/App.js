@@ -40,7 +40,7 @@ const App = () => {
 
   return (
     <div>
-      <Navigation />
+      {location.pathname !== '/powerbuilding' && <Navigation />}
       <div className="content-container">
         <TransitionGroup>
           <CSSTransition key={location.key} classNames="fade" timeout={500}>
