@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      (function () {
+        try {
+          var url = new URL(window.location.href);
+          // If a "to" query exists (e.g. ?to=powerbuilding), convert it to a hash route
+          var to = url.searchParams.get('to'); // e.g., "powerbuilding"
+          if (to) {
+            url.searchParams.delete('to');               // keep other params
+            var rest = url.searchParams.toString();
+            var newHash = '#/' + to + (rest ? ('?' + rest) : '');
+            window.location.replace(url.origin + url.pathname + newHash);
+            return;
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
