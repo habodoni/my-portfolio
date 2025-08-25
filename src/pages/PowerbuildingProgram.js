@@ -286,7 +286,7 @@ const PowerbuildingProgram = () => {
       content += `WEEK ${week.week}\n`;
       content += `==========\n\n`;
       
-      const workoutNames = ['ME Lower', 'ME Upper', 'DE Lower', 'DE Upper'];
+      const workoutNames = ['ME Upper', 'ME Lower', 'DE Upper', 'DE Lower'];
       week.workouts.forEach((workout, workoutIndex) => {
         content += `${workoutNames[workoutIndex]} - ${workout.type}\n`;
         content += `Main: ${workout.mainExercise} - ${workout.sets} × ${workout.reps} @ ${workout.weight}lbs (${workout.percentage}%)\n`;
@@ -321,7 +321,7 @@ const PowerbuildingProgram = () => {
     let csv = 'Week,Day,Type,Exercise,Sets,Reps,Weight,Percentage,RepScheme,Category\n';
     
     generatedProgram.schedule.forEach((week, weekIndex) => {
-      const workoutNames = ['ME Lower', 'ME Upper', 'DE Lower', 'DE Upper'];
+      const workoutNames = ['ME Upper', 'ME Lower', 'DE Upper', 'DE Lower'];
       week.workouts.forEach((workout, workoutIndex) => {
         // Main exercise
         csv += `${week.week},${workoutNames[workoutIndex]},${workout.type},${workout.mainExercise},${workout.sets},${workout.reps},${workout.weight},${workout.percentage},${workout.repScheme || ''},Main\n`;
@@ -475,7 +475,7 @@ const PowerbuildingProgram = () => {
             <div className="program-schedule">
               {generatedProgram.schedule.map((week, weekIndex) => {
                 const isExpanded = expandedWeeks.has(week.week);
-                const workoutNames = ['ME Lower', 'ME Upper', 'DE Lower', 'DE Upper'];
+                const workoutNames = ['ME Upper', 'ME Lower', 'DE Upper', 'DE Lower'];
                 
                 return (
                   <div key={weekIndex} className="week-container">
