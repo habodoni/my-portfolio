@@ -728,3 +728,8 @@
     border-right: none;
   }
 }
+
+/* Hide navigation on powerbuilding page */
+.navigation-container {
+  display: none !important;
+}
