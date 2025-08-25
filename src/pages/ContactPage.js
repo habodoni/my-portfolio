@@ -115,7 +115,10 @@ const ContactPage = () => {
                 </a>
             </div>
 
-            <button className="home-button" onClick={() => navigate('/')}>Back to Home</button>
+            <div className="button-group">
+                <button className="home-button" onClick={() => navigate('/')}>Back to Home</button>
+                <button className="misc-button" onClick={() => navigate('/powerbuilding')}>Misc</button>
+            </div>
         </div>
     );
 };
