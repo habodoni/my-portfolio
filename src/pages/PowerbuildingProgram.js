@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import jsPDF from "jspdf";
 import './PowerbuildingProgram.css';
 
 const PowerbuildingProgram = () => {
@@ -240,9 +241,27 @@ const PowerbuildingProgram = () => {
     setExpandedWeeks(newExpandedWeeks);
   };
 
+
   const exportToPDF = () => {
     if (!generatedProgram) return;
-    alert('PDF export temporarily disabled. Use CSV export instead.');
+
+    const doc = new jsPDF();
+    const content = generatePDFContent();
+
+    // Split text into lines that fit on the page
+    const lines = doc.splitTextToSize(content, 180); // 180 = page width
+    let y = 20;
+
+    lines.forEach(line => {
+      if (y > 280) {  // check for page overflow
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(line, 10, y);
+      y += 8; // line height
+    });
+
+    doc.save(`powerbuilding-program-${generatedProgram.weeks}weeks.pdf`);
   };
 
   const exportToCSV = () => {
@@ -333,9 +352,9 @@ const PowerbuildingProgram = () => {
         <div className="intro-content">
           <div className="intro-card personal-intro full-width">
             <h3>Hey, I'm Hazem</h3>
-            <p>I built this powerbuilding program generator because I wanted to experiment with combining <strong>Westside Barbell's proven conjugate method</strong> with some additional accessory work for a more well-rounded approach to training.</p>
-            <p>This tool generates personalized programs based on your current maxes, and I'll be using it myself to test this methodology. As I learn and adapt, I might update the program to reflect what works best.</p>
-            <p>I'm sharing this in hopes that it might help others who are interested in this style of training. Whether you're new to conjugate training or just looking for a structured approach to powerbuilding, I hope this tool serves you well!</p>
+            <p>I built this because I wanted to experiment with combining <strong>Westside Barbell's conjugate method</strong> with some additional accessory work for a more well-rounded approach to training.</p>
+            <p>This tool generates personalized programs based on your current maxes, and I'll be using it myself to test this methodology. As I learn and adapt, I might update the program to reflect what works best (for all I know I might get weaker).</p>
+            <p>I'm sharing this in hopes that it might help others who are interested in this style of training. Whether you're new to conjugate training or just looking for a structured approach to powerbuilding, I hope this tool can be of use.</p>
             <p><em>Remember: This is my personal experimentation, and everyone responds differently to training. Listen to your body and adjust as needed.</em></p>
           </div>
 
