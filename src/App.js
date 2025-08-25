@@ -7,6 +7,7 @@ import MazeGame from './pages/MazeGame';
 import ResumeTimeline from './pages/ResumeTimeline';
 import ContactPage from './pages/ContactPage';
 import TypingTest from './pages/TypingTest';
+import PowerbuildingProgram from './pages/PowerbuildingProgram';
 import './App.css';
 import './PageTransitions.css';
 
@@ -50,6 +51,7 @@ const App = () => {
               <Route path="/maze-game" element={<MazeGame />} />
               <Route path="/resume-timeline" element={<ResumeTimeline />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/powerbuilding" element={<PowerbuildingProgram />} />
             </Routes>
           </CSSTransition>
         </TransitionGroup>
