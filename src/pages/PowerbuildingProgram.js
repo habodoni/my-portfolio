@@ -2,6 +2,39 @@ import React, { useState, useMemo } from 'react';
 import jsPDF from "jspdf";
 import './PowerbuildingProgram.css';
 
+const round5 = (n) => Math.round(n / 5) * 5;
+
+/** Percent table (safer + realistic)
+ * - ME: work up to a heavy top set for the variation. We map to % of comp max.
+ * - DE: wave 50/55/60% (upper) and 50/55/60% (lower), repeating.
+ */
+const ME_PERCENTS = {
+  // Upper (relative to Bench 1RM)
+  "Close Grip Bench Press":       { min: 87, max: 94 },
+  "Incline Barbell Press":        { min: 82, max: 90 },
+  "Floor Press":                  { min: 85, max: 92 },
+  "Spoto Press":                  { min: 86, max: 92 },
+  "Paused Bench Press":           { min: 88, max: 95 },
+  "Pin Press":                    { min: 90, max: 95 },
+  "Weighted Dips":                { min: 80, max: 88 },
+  "JM Press":                     { min: 75, max: 85 },
+
+  // Lower (relative to Squat 1RM unless noted)
+  "Low Box Squat":                { min: 87, max: 94 },
+  "Deficit Deadlift":             { min: 85, max: 92 }, // relative to Deadlift
+  "Safety Bar Squat":             { min: 82, max: 90 },
+  "Block Pull":                   { min: 88, max: 94 }, // deadlift relative
+  "Rack Pull":                    { min: 90, max: 96 }, // deadlift relative
+  "Zercher Squat":                { min: 75, max: 85 },
+};
+
+  // replace your deWavePercent with this
+const deWavePercent = (week) => {
+  // 1→55%, 2→60%, 3→65%, then repeat
+  const step = ((week - 1) % 3);
+  return [55, 60, 65][step];
+};
+
 const PowerbuildingProgram = () => {
   const [maxes, setMaxes] = useState({ squat: '', bench: '', deadlift: '' });
   const [programLength, setProgramLength] = useState(12);
@@ -27,65 +60,86 @@ const PowerbuildingProgram = () => {
     }
     const program = {
       weeks: programLength,
-      maxes: maxes,
+      maxes,
       schedule: generateSchedule(maxes, programLength)
     };
     setGeneratedProgram(program);
-    setShowProgram(true); // open after generating (UI only)
+    setShowProgram(true);
   };
 
-  const generateSchedule = (maxes, weeks) => {
+  const generateSchedule = (mx, weeks) => {
     const schedule = [];
     for (let week = 1; week <= weeks; week++) {
-      const weekProgram = {
+      schedule.push({
         week,
         workouts: [
-          generateMaxEffortDay('upper', maxes.bench, week),
-          generateMaxEffortDay('lower', maxes.squat, week),
-          generateDynamicDay('upper', maxes.bench, week),
-          generateDynamicDay('lower', maxes.squat, week, maxes.deadlift)
+          generateMaxEffortDay('upper', mx, week),
+          generateMaxEffortDay('lower', mx, week),
+          generateDynamicDay('upper', mx, week),
+          generateDynamicDay('lower', mx, week)
         ]
-      };
-      schedule.push(weekProgram);
+      });
     }
     return schedule;
   };
 
-  const generateMaxEffortDay = (type, max, week) => {
-    const exercises = {
-      upper: [
-        'Close Grip Bench Press','Incline Barbell Press','Floor Press','2-Board Press',
-        'Pin Press','Decline Bench Press','JM Press','3-Board Press'
-      ],
-      lower: [
-        'Low Box Squat','Deficit Deadlift','Safety Bar Squat','Block Pull',
-        'Front Squat','Rack Pull','Zercher Squat','Good Mornings'
-      ]
-    };
-    const exercise = exercises[type][(week - 1) % exercises[type].length];
+  /** ME DAY **/
+  const generateMaxEffortDay = (type, mx, week) => {
+    const upperList = [
+      'Close Grip Bench Press',
+      'Incline Barbell Press',
+      'Floor Press',
+      'Spoto Press',           // replaced 2-board
+      'Paused Bench Press',    // replaced 3-board
+      'Pin Press',
+      'Weighted Dips',         // ✅ swapped in (no Decline)
+      'JM Press'
+    ];
+    const lowerList = [
+      'Low Box Squat',
+      'Deficit Deadlift',
+      'Safety Bar Squat',
+      'Block Pull',
+      'Rack Pull',
+      'Zercher Squat',
+      // Front Squat removed; Good Mornings not used as ME main
+    ];
 
-    let percentage;
-    if (type === 'upper') {
-      if (exercise === 'Close Grip Bench Press') percentage = 85 + (week % 3) * 3;
-      else if (exercise === 'Incline Barbell Press') percentage = 80 + (week % 3) * 3;
-      else if (exercise === 'Floor Press') percentage = 85 + (week % 3) * 3;
-      else if (exercise === '2-Board Press') percentage = 90 + (week % 3) * 2;
-      else percentage = 85 + (week % 3) * 3;
-    } else {
-      if (exercise === 'Low Box Squat') percentage = 85 + (week % 3) * 2;
-      else if (exercise === 'Deficit Deadlift') percentage = 80 + (week % 3) * 2;
-      else if (exercise === 'Safety Bar Squat') percentage = 80 + (week % 3) * 2;
-      else if (exercise === 'Block Pull') percentage = 85 + (week % 3) * 2;
-      else percentage = 75 + (week % 3) * 2;
+    const list = type === 'upper' ? upperList : lowerList;
+    const exercise = list[(week - 1) % list.length];
+
+    // Choose realistic % window and nudge within it by week
+    const perc = ME_PERCENTS[exercise] || { min: 85, max: 92 }; // ✅ safe fallback
+    const span = perc.max - perc.min;
+    // 4-week micro-cycle: low→mid→high→reset
+    const step = (week - 1) % 4; // 0,1,2,3
+    const pct = Math.round(perc.min + (span * (step / 3)));
+
+    // pick source max: some pulls should key off deadlift rather than squat
+    let baseMax = (type === 'upper') ? mx.bench : mx.squat;
+    if (exercise === 'Deficit Deadlift' || exercise === 'Block Pull' || exercise === 'Rack Pull') {
+      baseMax = mx.deadlift;
     }
-    const weight = Math.round((max * percentage) / 100 / 5) * 5;
 
-    let reps, repScheme;
+    const weight = round5((baseMax * pct) / 100);
+
+    // Rep scheme stays 3/2/1/3 (new var)
     const repRotation = (week - 1) % 4;
-    if (repRotation === 0) { reps = '3'; repScheme = '3RM (Build)'; }
-    else if (repRotation === 1) { reps = '2'; repScheme = '2RM (Bridge)'; }
-    else if (repRotation === 2) { reps = '1'; repScheme = '1RM (Peak)'; }
-    else { reps = '3'; repScheme = '3RM (New Variation)'; }
+    const reps = repRotation === 0 ? '3' : repRotation === 1 ? '2' : repRotation === 2 ? '1' : '3';
+    const repScheme = repRotation === 0 ? '3RM (Build)'
+                      : repRotation === 1 ? '2RM (Bridge)'
+                      : repRotation === 2 ? '1RM (Peak)'
+                      : '3RM (New Variation)';
+
+    // Supplemental (avoid duplicate dips when dips are main)
+    let supplemental = generateSupplemental(type);
+    if (type === 'upper' && exercise === 'Weighted Dips') {
+      supplemental = supplemental.map(ex =>
+        ex.name === 'Weighted Dips'
+          ? { name: 'Dumbbell Incline Press', sets: '2', reps: '8-12' }
+          : ex
+      );
+    }
 
     return {
       type: 'Max Effort',
@@ -94,69 +148,97 @@ const PowerbuildingProgram = () => {
       reps,
       repScheme,
       weight,
-      percentage,
-      supplemental: generateSupplemental(type),
+      percentage: pct,
+      supplemental,
       accessories: generateAccessories(type)
     };
   };
 
-  const generateDynamicDay = (type, max, week, deadliftMax = null) => {
-    const exercises = {
-      upper: ['Speed Bench Press','Speed Close Grip Press','Speed Incline Press','Speed Floor Press'],
-      lower: ['Speed Box Squats','Speed Front Squats','Speed Deadlifts','Speed Good Mornings']
-    };
-    const exercise = exercises[type][(week - 1) % exercises[type].length];
 
-    let percentage; let weight;
-    if (type === 'upper') {
-      percentage = 55; weight = Math.round((max * percentage) / 100 / 5) * 5;
-    } else {
-      if (exercise === 'Speed Box Squats') { percentage = 55; weight = Math.round((max * percentage) / 100 / 5) * 5; }
-      else if (exercise === 'Speed Front Squats') { percentage = 45; weight = Math.round((max * percentage) / 100 / 5) * 5; }
-      else if (exercise === 'Speed Deadlifts') { percentage = 55; weight = Math.round((deadliftMax * percentage) / 100 / 5) * 5; }
-      else { percentage = 30; weight = Math.round((max * percentage) / 100 / 5) * 5; }
-    }
+  const generateDynamicDay = (type, mx, week) => {
+    // inside generateDynamicDay
+  if (type === 'upper') {
+    const upperDE = [
+      'Speed Bench Press',
+      'Speed Close Grip Press',
+      'Speed Incline Press',
+      'Speed Floor Press'
+    ];
+    const exercise = upperDE[(week - 1) % upperDE.length];
+    const pct = deWavePercent(week); // 55/60/65
+    const weight = round5((mx.bench * pct) / 100);
+
+    // restore westside-ish volume: 8×3
     return {
       type: 'Dynamic Effort',
       mainExercise: exercise,
-      sets: type === 'upper' ? '8' : '10',
-      reps: type === 'upper' ? '3' : '2',
+      sets: '8',
+      reps: '3',
       weight,
-      percentage,
-      accessories: generateAccessories(type)
+      percentage: pct,
+      accessories: generateAccessories('upper')
     };
-  };
+  }
 
+  // LOWER
+  const lowerDE = [
+    'Speed Box Squats',
+    'Speed Pause Squats',   // (keeps your front-squat removal)
+    'Speed Deadlifts'
+  ];
+  const exercise = lowerDE[(week - 1) % lowerDE.length];
+  const pct = deWavePercent(week);
+
+  let baseMax = mx.squat;
+  if (exercise === 'Speed Deadlifts') baseMax = mx.deadlift;
+
+  const weight = round5((baseMax * pct) / 100);
+
+  // restore westside-ish volume: 10×2
+  return {
+    type: 'Dynamic Effort',
+    mainExercise: exercise,
+    sets: '10',
+    reps: '2',
+    weight,
+    percentage: pct,
+    accessories: generateAccessories('lower')
+  };
+  }
+  
+
+  /** Supplemental (2–3 sets cap) */
   const generateSupplemental = (type) => {
-    const supplemental = {
-      upper: [
-        { name: 'Overhead Press (Barbell)', sets: '4', reps: '4-6' },
-        { name: 'Weighted Dips', sets: '3', reps: '6-8' }
-      ],
-      lower: [
-        { name: 'Front Squat', sets: '4', reps: '3-6' },
-        { name: 'Romanian Deadlift', sets: '3', reps: '6-8' }
-      ]
-    };
-    return supplemental[type];
+    if (type === 'upper') {
+      return [
+        { name: 'Overhead Press (Barbell)', sets: '3', reps: '4-6' },
+        { name: 'Weighted Dips',            sets: '2', reps: '6-8' }
+      ];
+    }
+    return [
+      // Front Squat removed
+      { name: 'Romanian Deadlift',  sets: '3', reps: '6-8' },
+      { name: 'Reverse Lunge (DB)', sets: '2', reps: '8-10/leg' }
+    ];
   };
 
+  /** Accessories (2–3 sets cap) */
   const generateAccessories = (type) => {
-    const accessories = {
-      upper: [
-        { name: 'Barbell Rows', sets: '4', reps: '8-12' },
-        { name: 'Weighted Pull-ups', sets: '4', reps: '6-10' },
-        { name: 'Skullcrushers', sets: '3', reps: '8-12' },
-        { name: 'Lateral Raises', sets: '3', reps: '12-20' },
-        { name: 'Barbell Curls', sets: '2', reps: '10-12' }
-      ],
-      lower: [
-        { name: 'Bulgarian Split Squats', sets: '3', reps: '10-12' },
-        { name: 'Hamstring Curls', sets: '3', reps: '10-15' },
-        { name: 'Weighted Abs (Rollouts)', sets: '3', reps: '8-12' }
-      ]
-    };
-    return accessories[type];
+    if (type === 'upper') {
+      return [
+        { name: 'Barbell Rows',       sets: '3', reps: '8-12' },
+        { name: 'Weighted Pull-ups',  sets: '2', reps: '6-10' },
+        { name: 'Skullcrushers',      sets: '2', reps: '10-12' },
+        { name: 'Lateral Raises',     sets: '2', reps: '12-20' },
+        { name: 'Barbell Curls',      sets: '2', reps: '10-12' }
+      ];
+    }
+    return [
+      { name: 'Bulgarian Split Squats', sets: '2', reps: '10-12/leg' },
+      { name: 'Hamstring Curls',        sets: '3', reps: '10-15' },
+      { name: 'Good Mornings (light)',  sets: '2', reps: '8-12' }, // accessory only
+      { name: 'Weighted Abs (Rollouts)',sets: '2', reps: '8-12' }
+    ];
   };
 
   const toggleProgram = () => setShowProgram(!showProgram);
@@ -214,7 +296,7 @@ const PowerbuildingProgram = () => {
         content += `\n`;
       });
     });
-    content += `\nNOTES:\n- This is an experimental program combining Westside Barbell conjugate method with powerbuilding elements\n- Rest 2-3 minutes between main lifts, 60-90 seconds between accessories\n- Listen to your body and adjust as needed\n- Form always comes first\n\n`;
+    content += `\nNOTES:\n- Conjugate-inspired with powerbuilding accessories\n- Rest 2–3 min main lifts, 60–90s accessories\n- Adjust as needed; form first\n\n`;
     content += `Generated by Hazem Abo-Donia - hazemabodonia.com/powerbuilding`;
     return content;
   };
@@ -227,11 +309,11 @@ const PowerbuildingProgram = () => {
         csv += `${week.week},${workoutNames[idx]},${workout.type},${workout.mainExercise},${workout.sets},${workout.reps},${workout.weight},${workout.percentage},${workout.repScheme || ''},Main\n`;
         if (workout.supplemental) {
           workout.supplemental.forEach(ex => {
-            csv += `${week.week},${workoutNames[idx]},${workout.type},${ex.name},${ex.sets},${ex.reps},, ,Supplemental\n`;
+            csv += `${week.week},${workoutNames[idx]},${workout.type},${ex.name},${ex.sets},${ex.reps},,,Supplemental\n`;
           });
         }
         workout.accessories.forEach(acc => {
-          csv += `${week.week},${workoutNames[idx]},${workout.type},${acc.name},${acc.sets},${acc.reps},, ,Accessory\n`;
+          csv += `${week.week},${workoutNames[idx]},${workout.type},${acc.name},${acc.sets},${acc.reps},,,Accessory\n`;
         });
       });
     });
@@ -262,32 +344,32 @@ const PowerbuildingProgram = () => {
           <div className="intro-card">
             <h3>Training Structure</h3>
             <p><strong>Max Effort (ME) Days:</strong> Heavy lifting with 1-3 rep maxes. These build absolute strength and teach your nervous system to handle heavy loads.</p>
-            <p><strong>Dynamic Effort (DE) Days:</strong> Speed work with lighter weights (50-70%). These improve rate of force development and bar speed.</p>
-            <p><strong>Accessory Work:</strong> Higher rep ranges (8-20) to build muscle and address weak points.</p>
+            <p><strong>Dynamic Effort (DE) Days:</strong> Speed work with lighter weights (50-60%). These improve rate of force development and bar speed.</p>
+            <p><strong>Accessory Work:</strong> Higher rep ranges to build muscle and address weak points.</p>
           </div>
 
           <div className="intro-card">
             <h3>Progression & Rest</h3>
-            <p><strong>Rep Scheme:</strong> 4-week rotation: Week 1=3RM, Week 2=2RM, Week 3=1RM, Week 4=new variation at 3RM.</p>
-            <p><strong>Rest:</strong> Take 2-3 minutes between main lifts, 60-90 seconds between accessories. Rest 1-2 days between upper/lower sessions.</p>
-            <p><strong>Progression:</strong> Add weight when you can complete all sets with good form. Don't rush - this is a marathon, not a sprint.</p>
+            <p><strong>Rep Scheme:</strong> 4-week rotation: 3RM → 2RM → 1RM → new variation at 3RM.</p>
+            <p><strong>Rest:</strong> 2–3 min main lifts, 60–90s accessories.</p>
+            <p><strong>Progression:</strong> Add weight when all sets are clean. Don’t rush.</p>
           </div>
 
           <div className="intro-card warning">
             <h3>Important Disclaimers</h3>
-            <p><strong>This is experimental training.</strong> I'm testing this methodology myself and sharing what works for me.</p>
-            <p><strong>Not medical advice.</strong> Consult with a healthcare professional before starting any new training program.</p>
-            <p><strong>Form first.</strong> Always prioritize proper technique over weight. If form breaks down, reduce the weight.</p>
-            <p><strong>Listen to your body.</strong> If you're feeling run down, take an extra rest day. Recovery is just as important as training.</p>
+            <p><strong>This is experimental training.</strong> I’m testing this methodology myself and sharing what works for me.</p>
+            <p><strong>Not medical advice.</strong> Consult a professional before starting any program.</p>
+            <p><strong>Form first.</strong> Prioritize technique over load.</p>
+            <p><strong>Listen to your body.</strong> Add rest as needed.</p>
           </div>
 
           <div className="intro-card">
             <h3>Getting Started</h3>
-            <p>1. <strong>Enter your current maxes</strong> - be honest about your 1RM for squat, bench, and deadlift</p>
-            <p>2. <strong>Choose program length</strong> - 8, 12, or 16 weeks</p>
-            <p>3. <strong>Generate your program</strong> - get your personalized training schedule</p>
-            <p>4. <strong>Start training</strong> - begin with Week 1 and progress through the program</p>
-            <p>5. <strong>Track your progress</strong> - use the export features to save your program</p>
+            <p>1. <strong>Enter your current maxes</strong> (squat, bench, deadlift)</p>
+            <p>2. <strong>Choose program length</strong> (8/12/16 weeks)</p>
+            <p>3. <strong>Generate</strong> your plan</p>
+            <p>4. <strong>Train</strong> week by week</p>
+            <p>5. <strong>Export</strong> PDF/CSV to track</p>
           </div>
         </div>
       </div>
