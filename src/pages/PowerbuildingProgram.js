@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import jsPDF from "jspdf";
+import autoTable from 'jspdf-autotable';
 import './PowerbuildingProgram.css';
 
 const round5 = (n) => Math.round(n / 5) * 5;
 
-/** Percent table (safer + realistic)
- * - ME: work up to a heavy top set for the variation. We map to % of comp max.
- * - DE: wave 50/55/60% (upper) and 50/55/60% (lower), repeating.
+/** Percent table
+ * - ME: we show a suggested % RANGE and a target top single (upper bound) but cue "strain max".
+ * - DE: wave 3 weeks at a time; with bands = 50/55/60% *bar only*; no bands = 60/65/70% straight weight.
  */
 const ME_PERCENTS = {
   // Upper (relative to Bench 1RM)
@@ -21,23 +22,25 @@ const ME_PERCENTS = {
 
   // Lower (relative to Squat 1RM unless noted)
   "Low Box Squat":                { min: 87, max: 94 },
-  "Deficit Deadlift":             { min: 85, max: 92 }, // relative to Deadlift
+  "Deficit Deadlift":             { min: 85, max: 92 }, // relative to Deadlift 1RM
   "Safety Bar Squat":             { min: 82, max: 90 },
   "Block Pull":                   { min: 88, max: 94 }, // deadlift relative
   "Rack Pull":                    { min: 90, max: 96 }, // deadlift relative
   "Zercher Squat":                { min: 75, max: 85 },
 };
 
-  // replace your deWavePercent with this
-const deWavePercent = (week) => {
-  // 1→55%, 2→60%, 3→65%, then repeat
-  const step = ((week - 1) % 3);
-  return [55, 60, 65][step];
+// 12-week snapshot (conjugate is ongoing; we just render 12 wks)
+const DEFAULT_WEEKS = 12;
+
+// 3-week wave cycle helper
+const deWavePercent = (week, useBands) => {
+  const step = (week - 1) % 3; // 0,1,2
+  return useBands ? [50, 55, 60][step] : [60, 65, 70][step];
 };
 
 const PowerbuildingProgram = () => {
   const [maxes, setMaxes] = useState({ squat: '', bench: '', deadlift: '' });
-  const [programLength, setProgramLength] = useState(12);
+  const [useBands, setUseBands] = useState(false);
   const [generatedProgram, setGeneratedProgram] = useState(null);
   const [showProgram, setShowProgram] = useState(false);
   const [expandedWeeks, setExpandedWeeks] = useState(new Set());
@@ -59,15 +62,16 @@ const PowerbuildingProgram = () => {
       return;
     }
     const program = {
-      weeks: programLength,
+      weeks: DEFAULT_WEEKS,
       maxes,
-      schedule: generateSchedule(maxes, programLength)
+      useBands,
+      schedule: generateSchedule(maxes, DEFAULT_WEEKS, useBands)
     };
     setGeneratedProgram(program);
     setShowProgram(true);
   };
 
-  const generateSchedule = (mx, weeks) => {
+  const generateSchedule = (mx, weeks, useBandsFlag) => {
     const schedule = [];
     for (let week = 1; week <= weeks; week++) {
       schedule.push({
@@ -75,24 +79,26 @@ const PowerbuildingProgram = () => {
         workouts: [
           generateMaxEffortDay('upper', mx, week),
           generateMaxEffortDay('lower', mx, week),
-          generateDynamicDay('upper', mx, week),
-          generateDynamicDay('lower', mx, week)
+          generateDynamicDay('upper', mx, week, useBandsFlag),
+          generateDynamicDay('lower', mx, week, useBandsFlag)
         ]
       });
     }
     return schedule;
   };
 
-  /** ME DAY **/
+  /** =========================
+   *  MAX EFFORT (always 1RM)
+   *  ========================= */
   const generateMaxEffortDay = (type, mx, week) => {
     const upperList = [
       'Close Grip Bench Press',
       'Incline Barbell Press',
       'Floor Press',
-      'Spoto Press',           // replaced 2-board
-      'Paused Bench Press',    // replaced 3-board
+      'Spoto Press',
+      'Paused Bench Press',
       'Pin Press',
-      'Weighted Dips',         // ✅ swapped in (no Decline)
+      'Weighted Dips',
       'JM Press'
     ];
     const lowerList = [
@@ -102,34 +108,25 @@ const PowerbuildingProgram = () => {
       'Block Pull',
       'Rack Pull',
       'Zercher Squat',
-      // Front Squat removed; Good Mornings not used as ME main
     ];
 
     const list = type === 'upper' ? upperList : lowerList;
     const exercise = list[(week - 1) % list.length];
 
-    // Choose realistic % window and nudge within it by week
-    const perc = ME_PERCENTS[exercise] || { min: 85, max: 92 }; // ✅ safe fallback
-    const span = perc.max - perc.min;
-    // 4-week micro-cycle: low→mid→high→reset
-    const step = (week - 1) % 4; // 0,1,2,3
-    const pct = Math.round(perc.min + (span * (step / 3)));
-
-    // pick source max: some pulls should key off deadlift rather than squat
+    // pick base max
     let baseMax = (type === 'upper') ? mx.bench : mx.squat;
     if (exercise === 'Deficit Deadlift' || exercise === 'Block Pull' || exercise === 'Rack Pull') {
       baseMax = mx.deadlift;
     }
 
-    const weight = round5((baseMax * pct) / 100);
+    const perc = ME_PERCENTS[exercise] || { min: 85, max: 92 };
+    const wtMin = round5((baseMax * perc.min) / 100);
+    const wtMax = round5((baseMax * perc.max) / 100);
 
-    // Rep scheme stays 3/2/1/3 (new var)
-    const repRotation = (week - 1) % 4;
-    const reps = repRotation === 0 ? '3' : repRotation === 1 ? '2' : repRotation === 2 ? '1' : '3';
-    const repScheme = repRotation === 0 ? '3RM (Build)'
-                      : repRotation === 1 ? '2RM (Bridge)'
-                      : repRotation === 2 ? '1RM (Peak)'
-                      : '3RM (New Variation)';
+    // Always show 1RM strain max; display a suggested range and the top target
+    const repScheme = '1RM (strain max)';
+    const percentage = `${perc.min}-${perc.max}`;
+    const weight = wtMax; // "target top single" anchor
 
     // Supplemental (avoid duplicate dips when dips are main)
     let supplemental = generateSupplemental(type);
@@ -145,67 +142,69 @@ const PowerbuildingProgram = () => {
       type: 'Max Effort',
       mainExercise: exercise,
       sets: '1',
-      reps,
-      repScheme,
-      weight,
-      percentage: pct,
+      reps: '1',
+      repScheme, // 1RM
+      weight,    // top single target
+      percentage,
+      rangeNote: `Suggested top single ≈ ${wtMin}-${wtMax} lbs (${perc.min}–${perc.max}% of comp max).`,
       supplemental,
       accessories: generateAccessories(type)
     };
   };
 
+  /** ==============================
+   *  DYNAMIC EFFORT (3-week blocks)
+   *  ============================== */
+  const generateDynamicDay = (type, mx, week, useBandsFlag) => {
+    if (type === 'upper') {
+      const upperDE = [
+        'Speed Bench Press',
+        'Speed Close Grip Press',
+        'Speed Incline Press',
+        'Speed Floor Press'
+      ];
+      // Hold same DE lift for 3 weeks, then rotate
+      const exercise = upperDE[Math.floor((week - 1) / 3) % upperDE.length];
+      const pct = deWavePercent(week, useBandsFlag); // bar% if bands, straight% if no bands
+      const weight = round5((mx.bench * pct) / 100);
 
-  const generateDynamicDay = (type, mx, week) => {
-    // inside generateDynamicDay
-  if (type === 'upper') {
-    const upperDE = [
-      'Speed Bench Press',
-      'Speed Close Grip Press',
-      'Speed Incline Press',
-      'Speed Floor Press'
+      return {
+        type: 'Dynamic Effort',
+        mainExercise: exercise,
+        sets: '8',
+        reps: '3',
+        weight,
+        percentage: pct,
+        tensionText: useBandsFlag
+          ? 'Bar weight only + 20–25% band/chain tension at lockout.'
+          : 'Straight weight (no bands/chains).',
+        accessories: generateAccessories('upper')
+      };
+    }
+
+    const lowerDE = [
+      'Speed Box Squats',
+      'Speed Pause Squats',
+      'Speed Deadlifts'
     ];
-    const exercise = upperDE[(week - 1) % upperDE.length];
-    const pct = deWavePercent(week); // 55/60/65
-    const weight = round5((mx.bench * pct) / 100);
+    const exercise = lowerDE[Math.floor((week - 1) / 3) % lowerDE.length];
+    const pct = deWavePercent(week, useBandsFlag);
+    const baseMax = exercise === 'Speed Deadlifts' ? mx.deadlift : mx.squat;
+    const weight = round5((baseMax * pct) / 100);
 
-    // restore westside-ish volume: 8×3
     return {
       type: 'Dynamic Effort',
       mainExercise: exercise,
-      sets: '8',
-      reps: '3',
+      sets: '10',
+      reps: '2',
       weight,
       percentage: pct,
-      accessories: generateAccessories('upper')
+      tensionText: useBandsFlag
+        ? 'Bar weight only + 20–25% band/chain tension at lockout.'
+        : 'Straight weight (no bands/chains).',
+      accessories: generateAccessories('lower')
     };
-  }
-
-  // LOWER
-  const lowerDE = [
-    'Speed Box Squats',
-    'Speed Pause Squats',   // (keeps your front-squat removal)
-    'Speed Deadlifts'
-  ];
-  const exercise = lowerDE[(week - 1) % lowerDE.length];
-  const pct = deWavePercent(week);
-
-  let baseMax = mx.squat;
-  if (exercise === 'Speed Deadlifts') baseMax = mx.deadlift;
-
-  const weight = round5((baseMax * pct) / 100);
-
-  // restore westside-ish volume: 10×2
-  return {
-    type: 'Dynamic Effort',
-    mainExercise: exercise,
-    sets: '10',
-    reps: '2',
-    weight,
-    percentage: pct,
-    accessories: generateAccessories('lower')
   };
-  }
-  
 
   /** Supplemental (2–3 sets cap) */
   const generateSupplemental = (type) => {
@@ -216,13 +215,12 @@ const PowerbuildingProgram = () => {
       ];
     }
     return [
-      // Front Squat removed
       { name: 'Romanian Deadlift',  sets: '3', reps: '6-8' },
       { name: 'Reverse Lunge (DB)', sets: '2', reps: '8-10/leg' }
     ];
   };
 
-  /** Accessories (2–3 sets cap) */
+  /** Accessories (2–3 sets cap) — hybrid powerbuilding */
   const generateAccessories = (type) => {
     if (type === 'upper') {
       return [
@@ -236,7 +234,7 @@ const PowerbuildingProgram = () => {
     return [
       { name: 'Bulgarian Split Squats', sets: '2', reps: '10-12/leg' },
       { name: 'Hamstring Curls',        sets: '3', reps: '10-15' },
-      { name: 'Good Mornings (light)',  sets: '2', reps: '8-12' }, // accessory only
+      { name: 'Good Mornings (light)',  sets: '2', reps: '8-12' },
       { name: 'Weighted Abs (Rollouts)',sets: '2', reps: '8-12' }
     ];
   };
@@ -252,14 +250,144 @@ const PowerbuildingProgram = () => {
   const exportToPDF = () => {
     if (!generatedProgram) return;
     const doc = new jsPDF();
-    const content = generatePDFContent();
-    const lines = doc.splitTextToSize(content, 180);
-    let y = 20;
-    lines.forEach(line => {
-      if (y > 280) { doc.addPage(); y = 20; }
-      doc.text(line, 10, y);
-      y += 8;
+    const toc = [];
+  
+    // ===== First page content (centered vertically) =====
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const lineHeight = 7;
+  
+    const content = [
+      { text: "Powerbuilding Program", size: 22, align: "center" },
+  
+      // Spacer after title
+      { text: " ", size: 12, align: "center", spacer: true },
+  
+      {
+        text: `Your Maxes: Squat ${generatedProgram.maxes.squat} | Bench ${generatedProgram.maxes.bench} | Deadlift ${generatedProgram.maxes.deadlift}`,
+        size: 12,
+        align: "center",
+      },
+      {
+        text: `Bands/Chains: ${
+          generatedProgram.useBands ? "YES (bar% + tension)" : "NO (straight bar%)"
+        }`,
+        size: 12,
+        align: "center",
+      },
+  
+      // Spacer before intro
+      { text: " ", size: 12, align: "center", spacer: true },
+    ];
+  
+    // Intro paragraph (split into lines)
+    const intro = `Hey, I'm Hazem
+      I put this together because I wanted to try mixing Westside Barbell’s conjugate method with some extra accessory work for a more powerbuilding feel.
+
+      This is experimental, I’ll be running it myself. It might work really well, it might not. Either way I’ll keep tweaking it as I go and share updates as I learn.
+
+      Think of this as a template you can build from. Everyone responds differently, so adjust things to fit your own progress and recovery.`;
+  
+    const introLines = doc.splitTextToSize(intro, 170).map((line) => ({
+      text: line,
+      size: 11,
+      align: "center",
+    }));
+  
+    content.push(...introLines);
+  
+    // Calculate total block height including spacers
+    const blockHeight = content.reduce(
+      (sum, line) => sum + (line.spacer ? lineHeight * 2 : lineHeight),
+      0
+    );
+  
+    let currentY = (pageHeight - blockHeight) / 2;
+  
+    // Render content
+    content.forEach((line) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(line.size);
+  
+      if (!line.spacer) {
+        doc.text(line.text, 105, currentY, { align: line.align });
+      }
+  
+      currentY += line.spacer ? lineHeight * 2 : lineHeight;
     });
+  
+    // ===== New page for TOC =====
+    doc.addPage();
+    let tocY = 30;
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Table of Contents", 20, tocY);
+    tocY += 10;
+    const tocStartPage = doc.internal.getNumberOfPages();
+  
+    // ===== Loop through weeks =====
+    generatedProgram.schedule.forEach((week) => {
+      const page = doc.internal.getNumberOfPages();
+      toc.push({ week: week.week, page });
+  
+      doc.addPage();
+      doc.setFontSize(14);
+      doc.text(`WEEK ${week.week}`, 14, 20);
+  
+      let localY = 28;
+      week.workouts.forEach((workout) => {
+        doc.setFontSize(12);
+        doc.text(`${workout.type} – ${workout.mainExercise}`, 14, localY);
+        localY += 6;
+  
+        autoTable(doc, {
+          startY: localY,
+          head: [["Exercise", "Sets", "Reps", "Weight/Notes"]],
+          body: [
+            [
+              workout.mainExercise,
+              workout.sets,
+              workout.reps,
+              `${workout.weight} lbs (${workout.percentage}%) ${
+                workout.repScheme || ""
+              }`,
+            ],
+            ...(workout.supplemental || []).map((ex) => [
+              ex.name,
+              ex.sets,
+              ex.reps,
+              "Supplemental",
+            ]),
+            ...(workout.accessories || []).map((acc) => [
+              acc.name,
+              acc.sets,
+              acc.reps,
+              "Accessory",
+            ]),
+          ],
+          theme: "grid",
+          styles: { fontSize: 10, cellPadding: 3 },
+          headStyles: {
+            fillColor: [220, 220, 220],
+            textColor: 20,
+            fontStyle: "bold",
+          },
+        });
+  
+        localY = doc.lastAutoTable.finalY + 10;
+      });
+    });
+  
+    // ===== Back to TOC page → Fill with clickable links =====
+    doc.setPage(tocStartPage);
+    toc.forEach(({ week, page }) => {
+      doc.setTextColor(60, 90, 200);
+      doc.textWithLink(`Week ${week}`, 20, tocY, { pageNumber: page });
+      tocY += 8;
+    });
+    doc.setTextColor(0, 0, 0);
+  
+    // ===== Save =====
     doc.save(`powerbuilding-program-${generatedProgram.weeks}weeks.pdf`);
   };
 
@@ -278,7 +406,9 @@ const PowerbuildingProgram = () => {
   const generatePDFContent = () => {
     let content = `POWERBUILDING PROGRAM - ${generatedProgram.weeks} WEEKS\n`;
     content += `Generated by Hazem's Powerbuilding Program Generator\n`;
-    content += `Your Maxes: Squat: ${generatedProgram.maxes.squat}lbs | Bench: ${generatedProgram.maxes.bench}lbs | Deadlift: ${generatedProgram.maxes.deadlift}lbs\n\n`;
+    content += `Your Maxes: Squat: ${generatedProgram.maxes.squat}lbs | Bench: ${generatedProgram.maxes.bench}lbs | Deadlift: ${generatedProgram.maxes.deadlift}lbs\n`;
+    content += `Bands/Chains: ${generatedProgram.useBands ? 'YES (use bar 50–60% + 20–25% band/chain tension)' : 'NO (use 60–75% straight bar weight)'}\n\n`;
+
     generatedProgram.schedule.forEach((week) => {
       content += `WEEK ${week.week}\n`;
       content += `==========\n\n`;
@@ -287,6 +417,8 @@ const PowerbuildingProgram = () => {
         content += `${workoutNames[idx]} - ${workout.type}\n`;
         content += `Main: ${workout.mainExercise} - ${workout.sets} × ${workout.reps} @ ${workout.weight}lbs (${workout.percentage}%)\n`;
         if (workout.repScheme) content += `Rep Scheme: ${workout.repScheme}\n`;
+        if (workout.rangeNote) content += `${workout.rangeNote}\n`;
+        if (workout.tensionText) content += `${workout.tensionText}\n`;
         if (workout.supplemental) {
           content += `Supplemental:\n`;
           workout.supplemental.forEach(ex => { content += `  ${ex.name} - ${ex.sets} × ${ex.reps}\n`; });
@@ -296,7 +428,11 @@ const PowerbuildingProgram = () => {
         content += `\n`;
       });
     });
-    content += `\nNOTES:\n- Conjugate-inspired with powerbuilding accessories\n- Rest 2–3 min main lifts, 60–90s accessories\n- Adjust as needed; form first\n\n`;
+    content += `\nNOTES:\n`;
+    content += `- Conjugate isn’t about rigid programming — it’s about finding and attacking YOUR weak points.\n`;
+    content += `- ME days: work up to a technically sound 1RM (strain max). Rotate variations weekly.\n`;
+    content += `- DE days: With bands/chains → 50–60% bar + 20–25% tension. Without bands → 60–75% straight bar. Keep speed high and rest short.\n`;
+    content += `- Accessories: hypertrophy work to build muscle and fix weak links (hybrid powerbuilding twist).\n\n`;
     content += `Generated by Hazem Abo-Donia - hazemabodonia.com/powerbuilding`;
     return content;
   };
@@ -306,7 +442,10 @@ const PowerbuildingProgram = () => {
     generatedProgram.schedule.forEach((week) => {
       const workoutNames = ['ME Upper','ME Lower','DE Upper','DE Lower'];
       week.workouts.forEach((workout, idx) => {
-        csv += `${week.week},${workoutNames[idx]},${workout.type},${workout.mainExercise},${workout.sets},${workout.reps},${workout.weight},${workout.percentage},${workout.repScheme || ''},Main\n`;
+        const repSchemeOut = workout.repScheme
+          ? workout.repScheme
+          : (generatedProgram.useBands ? 'DE (bar + bands/chains)' : 'DE (straight weight)');
+        csv += `${week.week},${workoutNames[idx]},${workout.type},${workout.mainExercise},${workout.sets},${workout.reps},${workout.weight},${workout.percentage},${repSchemeOut},Main\n`;
         if (workout.supplemental) {
           workout.supplemental.forEach(ex => {
             csv += `${week.week},${workoutNames[idx]},${workout.type},${ex.name},${ex.sets},${ex.reps},,,Supplemental\n`;
@@ -322,58 +461,53 @@ const PowerbuildingProgram = () => {
 
   return (
     <div className="powerbuilding-container">
+      {/* ==============================
+          Intro / Philosophy (less repetitive)
+         ============================== */}
       <div className="intro-section">
         <h2>tryna get strong</h2>
-        <p className="intro-subtitle">westside barbell inspired program with a powerbuilding focus</p>
+        <p className="intro-subtitle">westside barbell inspired program with a powerbuilding twist</p>
 
         <div className="intro-content">
           <div className="intro-card personal-intro full-width">
             <h3>Hey, I'm Hazem</h3>
-            <p>I built this because I wanted to experiment with combining <strong>Westside Barbell's conjugate method</strong> with some additional accessory work for a more well-rounded approach to training.</p>
-            <p>This tool generates personalized programs based on your current maxes, and I'll be using it myself to test this methodology. As I learn and adapt, I might update the program to reflect what works best (for all I know I might get weaker).</p>
-            <p>I'm sharing this in hopes that it might help others who are interested in this style of training. Whether you're new to conjugate training or just looking for a structured approach to powerbuilding, I hope this tool can be of use.</p>
-            <p><em>Remember: This is my personal experimentation, and everyone responds differently to training. Listen to your body and adjust as needed.</em></p>
+            <p>I put this together because I wanted to try mixing <strong>Westside Barbell’s conjugate method</strong> with some extra accessory work for a more powerbuilding feel.</p>
+            <p>This is <strong>experimental</strong>, I’ll be running it myself. It might work really well, it might not. Either way I’ll keep tweaking it as I go and share updates as I learn.</p>
+            <p><em>Think of this as a template you can build from. Everyone responds differently, so adjust things to fit your own progress and recovery.</em></p>
           </div>
 
           <div className="intro-card">
-            <h3>What is This Program?</h3>
-            <p>This is an experimental program that combines <strong>Westside Barbell's proven conjugate method</strong> with additional accessory work for a <strong>powerbuilding approach</strong>. It's designed to build both strength and muscle simultaneously, but it's not a one-size-fits-all solution.</p>
-            <p><em>Note: This is my personal experimentation with training methodologies. Everyone responds differently to training, so listen to your body and adjust as needed.</em></p>
+            <h3>How it works (quickstart)</h3>
+            <ul>
+              <li><strong>ME days</strong>: Work up to a technically sound <strong>1RM strain max</strong> on a variation. Rotate weekly.</li>
+              <li><strong>DE days</strong>:
+                <br/>• With bands/chains → <strong>50/55/60% bar only</strong> + 20–25% tension  
+                <br/>• No bands/chains → <strong>60/65/70% straight bar</strong>  
+                <br/>Upper = 8×3, Lower = 10×2. Short rest, fast bar speed.
+              </li>
+              <li><strong>Accessories</strong>: Higher reps to build muscle and cover weak points.</li>
+            </ul>
           </div>
 
           <div className="intro-card">
-            <h3>Training Structure</h3>
-            <p><strong>Max Effort (ME) Days:</strong> Heavy lifting with 1-3 rep maxes. These build absolute strength and teach your nervous system to handle heavy loads.</p>
-            <p><strong>Dynamic Effort (DE) Days:</strong> Speed work with lighter weights (50-60%). These improve rate of force development and bar speed.</p>
-            <p><strong>Accessory Work:</strong> Higher rep ranges to build muscle and address weak points.</p>
-          </div>
-
-          <div className="intro-card">
-            <h3>Progression & Rest</h3>
-            <p><strong>Rep Scheme:</strong> 4-week rotation: 3RM → 2RM → 1RM → new variation at 3RM.</p>
-            <p><strong>Rest:</strong> 2–3 min main lifts, 60–90s accessories.</p>
-            <p><strong>Progression:</strong> Add weight when all sets are clean. Don’t rush.</p>
+            <h3>Conjugate philosophy</h3>
+            <p>Conjugate isn’t a one-size-fits-all program. The point is to rotate lifts, avoid staleness, build speed with DE work, and use accessories to fix your own weak links. This is just a 12-week snapshot you can repeat and adapt over time.</p>
           </div>
 
           <div className="intro-card warning">
-            <h3>Important Disclaimers</h3>
-            <p><strong>This is experimental training.</strong> I’m testing this methodology myself and sharing what works for me.</p>
-            <p><strong>Not medical advice.</strong> Consult a professional before starting any program.</p>
-            <p><strong>Form first.</strong> Prioritize technique over load.</p>
-            <p><strong>Listen to your body.</strong> Add rest as needed.</p>
-          </div>
-
-          <div className="intro-card">
-            <h3>Getting Started</h3>
-            <p>1. <strong>Enter your current maxes</strong> (squat, bench, deadlift)</p>
-            <p>2. <strong>Choose program length</strong> (8/12/16 weeks)</p>
-            <p>3. <strong>Generate</strong> your plan</p>
-            <p>4. <strong>Train</strong> week by week</p>
-            <p>5. <strong>Export</strong> PDF/CSV to track</p>
+            <h3>Training notes</h3>
+            <ul>
+              <li><strong>Form first.</strong> A “max” should still look clean, not sloppy.</li>
+              <li><strong>Rest</strong>: 2–3 min for main lifts; 60–90s for accessories.</li>
+              <li><strong>Auto-regulate.</strong> If bar speed slows down or recovery tanks, adjust the load, sets, or take an extra rest day.</li>
+            </ul>
           </div>
         </div>
       </div>
 
+      {/* ==============================
+          Inputs
+         ============================== */}
       <div className="input-section">
         <div className="maxes-input">
           <h2>Enter Your Maxes (lbs)</h2>
@@ -393,12 +527,12 @@ const PowerbuildingProgram = () => {
           </div>
         </div>
 
+        {/* Bands/Chains toggle reuses the same styling block */}
         <div className="program-length">
-          <h2>Program Length</h2>
-          <select value={programLength} onChange={(e) => setProgramLength(parseInt(e.target.value, 10))}>
-            <option value={8}>8 Weeks</option>
-            <option value={12}>12 Weeks</option>
-            <option value={16}>16 Weeks</option>
+          <h2>Bands / Chains?</h2>
+          <select value={useBands ? 'yes' : 'no'} onChange={(e)=>setUseBands(e.target.value==='yes')}>
+            <option value="no">No — 60/65/70% straight bar (DE)</option>
+            <option value="yes">Yes — 50/55/60% bar + 20–25% band/chain tension</option>
           </select>
         </div>
 
@@ -407,11 +541,15 @@ const PowerbuildingProgram = () => {
         </button>
       </div>
 
+      {/* ==============================
+          Output
+         ============================== */}
       {generatedProgram && (
         <div className="program-output">
           <h2>Your {generatedProgram.weeks}-Week Powerbuilding Program</h2>
+
           <div className="maxes-summary">
-            <p><strong>Your Maxes:</strong> Squat: {generatedProgram.maxes.squat}lbs | Bench: {generatedProgram.maxes.bench}lbs | Deadlift: {generatedProgram.maxes.deadlift}lbs</p>
+            <p><strong>Your Maxes:</strong> Squat: {generatedProgram.maxes.squat}lbs &nbsp;|&nbsp; Bench: {generatedProgram.maxes.bench}lbs &nbsp;|&nbsp; Deadlift: {generatedProgram.maxes.deadlift}lbs</p>
           </div>
 
           <div className="export-section">
@@ -420,7 +558,7 @@ const PowerbuildingProgram = () => {
               <button className="export-btn" onClick={exportToCSV}>📋 Download CSV</button>
             </div>
             <p className="export-note">
-              💡 <strong>Tip:</strong> You can import the CSV file into Google Sheets or Excel to track your progress!
+              Bands/Chains: <strong>{generatedProgram.useBands ? 'YES (bar% + tension)' : 'NO (straight bar%)'}</strong>. DE waves are 3-week blocks; ME is 1RM strain max with weekly variation.
             </p>
           </div>
 
@@ -469,6 +607,9 @@ const PowerbuildingProgram = () => {
                                   <span className="weight">{workout.weight}lbs ({workout.percentage}%)</span>
                                   {workout.repScheme && <span className="rep-scheme">{workout.repScheme}</span>}
                                 </div>
+                                {/* Show extra clarifiers inline */}
+                                {workout.rangeNote && <div className="lift-details" style={{marginTop:8}}><span>{workout.rangeNote}</span></div>}
+                                {workout.tensionText && <div className="lift-details" style={{marginTop:8}}><span>{workout.tensionText}</span></div>}
                               </div>
                             </div>
 
