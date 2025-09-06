@@ -120,6 +120,7 @@
   }
   
   .intro-card li { margin-bottom: 6px; }
+  .intro-card ul { padding-left: 18px; }
   
   /* Warning card with soft amber */
   .intro-card.warning {
@@ -214,6 +215,27 @@
   
   .program-length { text-align: center; margin-bottom: 18px; }
   .program-length select { min-width: 200px; cursor: pointer; }
+
+  /* Bands toggle */
+  /* fix the overall toggle block width so toggling text doesn't recenter the control */
+  .bands-toggle { display: inline-flex; gap: 12px; align-items: center; justify-content: space-between; width: 320px; margin: 0 auto; }
+  .toggle { position: relative; display: inline-block; width: 52px; height: 30px; flex: 0 0 52px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #d1c7f6; border-radius: 34px; transition: .2s;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .slider:before {
+    position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px;
+    background-color: white; transition: .2s; border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(16,24,40,0.12);
+  }
+  .toggle input:checked + .slider { background-color: var(--accent-2); }
+  .toggle input:checked + .slider:before { transform: translateX(22px); }
+  .toggle-text { text-align: left; width: 240px; overflow: hidden; }
+  .toggle-state { font-weight: 800; color: var(--accent); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+  .toggle-note { font-size: 0.85rem; color: var(--muted); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
   
   /* Generate button */
   .generate-btn {

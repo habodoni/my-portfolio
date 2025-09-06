@@ -6,31 +6,35 @@ import './PowerbuildingProgram.css';
 const round5 = (n) => Math.round(n / 5) * 5;
 
 /** Percent table
- * - ME: we show a suggested % RANGE and a target top single (upper bound) but cue "strain max".
- * - DE: wave 3 weeks at a time; with bands = 50/55/60% *bar only*; no bands = 60/65/70% straight weight.
+ * - ME: Target percentages for top single, but always gauge by bar speed and form.
+ * - DE: 9x3 bench (rotate grip every 3 sets), 10x2 squat/dead.
+ *   With bands: 40-50% bar + 15-20% band tension
+ *   No bands: 60-65% straight weight
  */
 const ME_PERCENTS = {
   // Upper (relative to Bench 1RM)
-  "Close Grip Bench Press":       { min: 87, max: 94 },
-  "Incline Barbell Press":        { min: 82, max: 90 },
-  "Floor Press":                  { min: 85, max: 92 },
-  "Spoto Press":                  { min: 86, max: 92 },
-  "Paused Bench Press":           { min: 88, max: 95 },
-  "Pin Press":                    { min: 90, max: 95 },
-  "Weighted Dips":                { min: 80, max: 88 },
-  "JM Press":                     { min: 75, max: 85 },
+  "Close Grip Bench Press":      { min: 85, max: 92 },
+  "Incline Barbell Press":       { min: 75, max: 85 },
+  "Floor Press":                 { min: 80, max: 90 },
+  "Spoto Press":                 { min: 85, max: 92 },
+  "2-Board Press":              { min: 85, max: 92 },
+  "3-Board Press":              { min: 87, max: 95 },
+  "Pin Press":                  { min: 80, max: 90 },
+  "Reverse Band Bench":         { min: 90, max: 97 }, // includes band tension
 
-  // Lower (relative to Squat 1RM unless noted)
-  "Low Box Squat":                { min: 87, max: 94 },
-  "Deficit Deadlift":             { min: 85, max: 92 }, // relative to Deadlift 1RM
-  "Safety Bar Squat":             { min: 82, max: 90 },
-  "Block Pull":                   { min: 88, max: 94 }, // deadlift relative
-  "Rack Pull":                    { min: 90, max: 96 }, // deadlift relative
-  "Zercher Squat":                { min: 75, max: 85 },
+  // Lower (relative to respective 1RM)
+  "Box Squat":                  { min: 80, max: 90 },  // squat max
+  "Pause Squat":                { min: 80, max: 90 },  // squat max
+  "Pin Squat":                  { min: 80, max: 90 },  // squat max
+  "Low Bar Squat":              { min: 85, max: 95 },  // squat max
+  "High Bar Squat":             { min: 85, max: 95 },  // squat max
+  "Deficit Deadlift":           { min: 80, max: 85 },  // deadlift max
+  "Block Pull":                 { min: 85, max: 95 },  // deadlift max
+  "Rack Pull":                  { min: 85, max: 95 },  // deadlift max
 };
 
-// 12-week snapshot (conjugate is ongoing; we just render 12 wks)
-const DEFAULT_WEEKS = 12;
+// 8-week program that can be repeated
+const DEFAULT_WEEKS = 8;
 
 // 3-week wave cycle helper
 const deWavePercent = (week, useBands) => {
@@ -91,23 +95,26 @@ const PowerbuildingProgram = () => {
    *  MAX EFFORT (always 1RM)
    *  ========================= */
   const generateMaxEffortDay = (type, mx, week) => {
+    // Pre-planned 8 week rotation based on progress
     const upperList = [
-      'Close Grip Bench Press',
-      'Incline Barbell Press',
-      'Floor Press',
-      'Spoto Press',
-      'Paused Bench Press',
-      'Pin Press',
-      'Weighted Dips',
-      'JM Press'
+      'Incline Barbell Press',    // Week 1 (done)
+      'Floor Press',              // Week 2 (done)
+      'Close Grip Bench Press',   // Week 3 (done)
+      '2-Board Press',            // Week 4
+      'Reverse Band Bench',       // Week 5
+      'Spoto Press',             // Week 6
+      '3-Board Press',           // Week 7
+      'Pin Press'                // Week 8
     ];
     const lowerList = [
-      'Low Box Squat',
-      'Deficit Deadlift',
-      'Safety Bar Squat',
-      'Block Pull',
-      'Rack Pull',
-      'Zercher Squat',
+      'Box Squat',               // Week 1 (done)
+      'Deficit Deadlift',        // Week 2 (done)
+      'Pause Squat',             // Week 3 (done)
+      'Block Pull',              // Week 4
+      'Pin Squat',              // Week 5
+      'Rack Pull',              // Week 6
+      'Low Bar Squat',          // Week 7
+      'High Bar Squat'          // Week 8
     ];
 
     const list = type === 'upper' ? upperList : lowerList;
@@ -128,8 +135,8 @@ const PowerbuildingProgram = () => {
     const percentage = `${perc.min}-${perc.max}`;
     const weight = wtMax; // "target top single" anchor
 
-    // Supplemental (avoid duplicate dips when dips are main)
-    let supplemental = generateSupplemental(type);
+  // Supplemental (avoid duplicate dips when dips are main)
+  let supplemental = generateSupplemental(type, week, 'ME');
     if (type === 'upper' && exercise === 'Weighted Dips') {
       supplemental = supplemental.map(ex =>
         ex.name === 'Weighted Dips'
@@ -148,49 +155,45 @@ const PowerbuildingProgram = () => {
       percentage,
       rangeNote: `Suggested top single ≈ ${wtMin}-${wtMax} lbs (${perc.min}–${perc.max}% of comp max).`,
       supplemental,
-      accessories: generateAccessories(type)
+      accessories: generateAccessories(type, week, 'ME')
     };
   };
 
   /** ==============================
-   *  DYNAMIC EFFORT (3-week blocks)
+   *  DYNAMIC EFFORT (with grip rotation for bench)
    *  ============================== */
   const generateDynamicDay = (type, mx, week, useBandsFlag) => {
     if (type === 'upper') {
-      const upperDE = [
-        'Speed Bench Press',
-        'Speed Close Grip Press',
-        'Speed Incline Press',
-        'Speed Floor Press'
-      ];
-      // Hold same DE lift for 3 weeks, then rotate
-      const exercise = upperDE[Math.floor((week - 1) / 3) % upperDE.length];
-      const pct = deWavePercent(week, useBandsFlag); // bar% if bands, straight% if no bands
-      const weight = round5((mx.bench * pct) / 100);
+      // 2-week rotation: odd = Speed Bench (9x3 with grip rotation), even = Speed Floor Press
+      const isSpeedBench = week % 2 === 1;
+      const exercise = isSpeedBench ? 'Speed Bench Press' : 'Speed Floor Press';
+
+      const barPct = useBandsFlag ? 45 : 60; // bar % (bands reduce bar%)
+      const weight = round5((mx.bench * barPct) / 100);
+      const bandNote = useBandsFlag ? '+ 15-20% band tension at top' : '(straight weight)';
+      const gripNote = isSpeedBench ? 'Rotate grip every 3 sets: Wide (1-3), Mid (4-6), Close (7-9)' : 'Use competition grip width';
 
       return {
         type: 'Dynamic Effort',
         mainExercise: exercise,
-        sets: '8',
+        sets: '9',
         reps: '3',
         weight,
-        percentage: pct,
-        tensionText: useBandsFlag
-          ? 'Bar weight only + 20–25% band/chain tension at lockout.'
-          : 'Straight weight (no bands/chains).',
-        accessories: generateAccessories('upper')
+        percentage: barPct,
+        tensionText: bandNote,
+        technique: gripNote,
+  supplemental: generateSupplemental('upper', week, 'DE'),
+        accessories: generateAccessories('upper', week, 'DE')
       };
     }
 
-    const lowerDE = [
-      'Speed Box Squats',
-      'Speed Pause Squats',
-      'Speed Deadlifts'
-    ];
-    const exercise = lowerDE[Math.floor((week - 1) / 3) % lowerDE.length];
-    const pct = deWavePercent(week, useBandsFlag);
-    const baseMax = exercise === 'Speed Deadlifts' ? mx.deadlift : mx.squat;
-    const weight = round5((baseMax * pct) / 100);
+    // lower DE: 2-week rotation between box squat and deadlift speed work
+    const isSpeedBox = week % 2 === 0;
+    const exercise = isSpeedBox ? 'Speed Box Squat' : 'Speed Deadlift';
+    const baseMax = isSpeedBox ? mx.squat : mx.deadlift;
+    const barPct = useBandsFlag ? (isSpeedBox ? 50 : 45) : (isSpeedBox ? 65 : 60);
+    const weight = round5((baseMax * barPct) / 100);
+    const bandNote = useBandsFlag ? (isSpeedBox ? '+ 15-20% band tension at top' : '+ 15% band tension at top') : '(straight weight)';
 
     return {
       type: 'Dynamic Effort',
@@ -198,44 +201,65 @@ const PowerbuildingProgram = () => {
       sets: '10',
       reps: '2',
       weight,
-      percentage: pct,
-      tensionText: useBandsFlag
-        ? 'Bar weight only + 20–25% band/chain tension at lockout.'
-        : 'Straight weight (no bands/chains).',
-      accessories: generateAccessories('lower')
+      percentage: barPct,
+      tensionText: bandNote,
+  supplemental: generateSupplemental('lower', week, 'DE'),
+      accessories: generateAccessories('lower', week, 'DE')
     };
   };
 
-  /** Supplemental (2–3 sets cap) */
-  const generateSupplemental = (type) => {
+  /** Supplemental and accessories with 4-week rotation for certain movements */
+  const generateSupplemental = (type, week, mode = 'ME') => {
+    const weekInBlock = ((week - 1) % 4) + 1; // 1-4
+
     if (type === 'upper') {
+      // DE Upper supplemental alternates every 4 weeks
+      const pressingMovement = weekInBlock <= 4 ? 
+        [
+          { name: 'Military Press', sets: '2', reps: '6-8' },
+          { name: 'Weighted Dips', sets: '2', reps: '8-10' }
+        ] : [
+          { name: 'Incline DB Press', sets: '2', reps: '8-10' },
+          { name: 'DB Overhead Press', sets: '2', reps: '8-10' }
+        ];
+      return pressingMovement;
+    }
+
+    // Lower supplemental logic
+    if (mode === 'ME') {
+      // On ME lower days: single leg press only (no back extension here)
       return [
-        { name: 'Overhead Press (Barbell)', sets: '3', reps: '4-6' },
-        { name: 'Weighted Dips',            sets: '2', reps: '6-8' }
+        { name: 'Single Leg Press', sets: '3', reps: '6-10/leg' }
       ];
     }
-    return [
-      { name: 'Romanian Deadlift',  sets: '3', reps: '6-8' },
-      { name: 'Reverse Lunge (DB)', sets: '2', reps: '8-10/leg' }
-    ];
+
+    // DE lower: use a back extension variation as the supplemental builder
+    return [ { name: 'Back Extension (DB RDL / Hyper)', sets: '3', reps: '8-12' } ];
   };
 
-  /** Accessories (2–3 sets cap) — hybrid powerbuilding */
-  const generateAccessories = (type) => {
+  /** Accessories with proper volume distribution and exercise rotation */
+  const generateAccessories = (type, week, mode = 'ME') => {
+    const weekInBlock = ((week - 1) % 4) + 1; // 1-4
+
     if (type === 'upper') {
+      // Biceps placement: ME days -> Single Arm Preacher, DE days -> Alternating DB Curls
+      const bicep = mode === 'ME' ? 'Single Arm Preacher Curls' : 'Alternating DB Curls';
       return [
-        { name: 'Barbell Rows',       sets: '3', reps: '8-12' },
-        { name: 'Weighted Pull-ups',  sets: '2', reps: '6-10' },
-        { name: 'Skullcrushers',      sets: '2', reps: '10-12' },
-        { name: 'Lateral Raises',     sets: '2', reps: '12-20' },
-        { name: 'Barbell Curls',      sets: '2', reps: '10-12' }
+        { name: 'Chest-Supported Row', sets: '3', reps: '8-10' },
+        { name: 'Lat Pulldown', sets: '3', reps: '10-12' },
+        { name: weekInBlock <= 4 ? 'Rolling Tricep Extensions' : 'Skullcrushers', 
+          sets: '2', reps: '12-15' },
+  { name: 'Side + Rear Delt Superset', sets: '2', reps: '12-20' },
+        { name: bicep, sets: '2', reps: '12-15' }
       ];
     }
+
     return [
-      { name: 'Bulgarian Split Squats', sets: '2', reps: '10-12/leg' },
-      { name: 'Hamstring Curls',        sets: '3', reps: '10-15' },
-      { name: 'Good Mornings (light)',  sets: '2', reps: '8-12' },
-      { name: 'Weighted Abs (Rollouts)',sets: '2', reps: '8-12' }
+      { name: 'Leg Extensions', sets: '2', reps: '12-15' },
+      { name: 'Leg Curls', sets: '2', reps: '12-15' },
+  { name: 'Adductor Machine / Cables', sets: '2', reps: '12-15' },
+      { name: 'Calf Work', sets: '2', reps: '12-20' },
+      { name: 'Ab Work', sets: '2', reps: '15-20' }
     ];
   };
 
@@ -483,7 +507,7 @@ const PowerbuildingProgram = () => {
               <li><strong>DE days</strong>:
                 <br/>• With bands/chains → <strong>50/55/60% bar only</strong> + 20–25% tension  
                 <br/>• No bands/chains → <strong>60/65/70% straight bar</strong>  
-                <br/>Upper = 8×3, Lower = 10×2. Short rest, fast bar speed.
+                <br/>Upper = 9×3, Lower = 10×2. Short rest, fast bar speed.
               </li>
               <li><strong>Accessories</strong>: Higher reps to build muscle and cover weak points.</li>
             </ul>
@@ -497,7 +521,7 @@ const PowerbuildingProgram = () => {
           <div className="intro-card warning">
             <h3>Training notes</h3>
             <ul>
-              <li><strong>Form first.</strong> A “max” should still look clean, not sloppy.</li>
+              <li><strong>Form first.</strong> A “max” should still look clean.</li>
               <li><strong>Rest</strong>: 2–3 min for main lifts; 60–90s for accessories.</li>
               <li><strong>Auto-regulate.</strong> If bar speed slows down or recovery tanks, adjust the load, sets, or take an extra rest day.</li>
             </ul>
@@ -530,10 +554,22 @@ const PowerbuildingProgram = () => {
         {/* Bands/Chains toggle reuses the same styling block */}
         <div className="program-length">
           <h2>Bands / Chains?</h2>
-          <select value={useBands ? 'yes' : 'no'} onChange={(e)=>setUseBands(e.target.value==='yes')}>
-            <option value="no">No — 60/65/70% straight bar (DE)</option>
-            <option value="yes">Yes — 50/55/60% bar + 20–25% band/chain tension</option>
-          </select>
+          <div className="bands-toggle">
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={useBands}
+                onChange={() => setUseBands(!useBands)}
+                aria-checked={useBands}
+                aria-label="Toggle bands and chains"
+              />
+              <span className="slider" />
+            </label>
+            <div className="toggle-text">
+              <div className="toggle-state">{useBands ? 'Bands ON' : 'Bands OFF'}</div>
+              <div className="toggle-note">{useBands ? 'Bar % 40-50% + 15-20% tension' : 'Straight bar % 60-65%'}</div>
+            </div>
+          </div>
         </div>
 
         <button className="generate-btn" onClick={generateProgram} disabled={!isValid} aria-disabled={!isValid}>
